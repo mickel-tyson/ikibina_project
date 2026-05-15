@@ -1,0 +1,1608 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--primary-gradient);
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+            transition: margin-left 0.3s;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+            min-height: 100vh;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: var(--primary-gradient);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .section-content {
+            display: none;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .draw-card {
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .winner-animation {
+            animation: pulse 2s infinite;
+        }
+        
+        @keyframes pulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+            100% { transform: scale(1); }
+        }
+        
+        .attendance-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 2rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .attendance-present { background-color: #28a745; color: white; }
+        .attendance-absent { background-color: #dc3545; color: white; }
+        .attendance-late { background-color: #ffc107; color: black; }
+        
+        .member-card {
+            transition: all 0.3s;
+        }
+        
+        .member-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .user-info {
+            color: white;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .draw-wheel {
+            width: 200px;
+            height: 200px;
+            border: 8px solid #667eea;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto;
+            background: white;
+            position: relative;
+            animation: spin 3s linear infinite paused;
+        }
+        
+        .draw-wheel.spinning {
+            animation-play-state: running;
+        }
+        
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="navbar-brand">
+                <i class="bi bi-shield-check me-2"></i>
+                Ikibina Guardian
+            </div>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showSection(event, 'dashboard')">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'members')">
+                    <i class="bi bi-people me-2"></i> Members
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'contributions')">
+                    <i class="bi bi-cash-stack me-2"></i> Contributions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'attendance')">
+                    <i class="bi bi-calendar-check me-2"></i> Attendance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'draw')">
+                    <i class="bi bi-dice-5 me-2"></i> Smart Draw
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'voting')">
+                    <i class="bi bi-balloon-heart me-2"></i> Voting
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'fines')">
+                    <i class="bi bi-cash-coin me-2"></i> Fines
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'loans')">
+                    <i class="bi bi-bank me-2"></i> Loans
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'meetings')">
+                    <i class="bi bi-calendar-event me-2"></i> Meetings
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'notifications')">
+                    <i class="bi bi-bell me-2"></i> Notifications
+                </a>
+            </li>
+        </ul>
+        
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-badge me-2"></i>
+                <div>
+                    <div class="fw-bold"><%= user.full_name %></div>
+                    <small>Group Chief</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-light mt-2 w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Chief Dashboard</h1>
+            <div>
+                <button class="btn btn-outline-secondary me-2" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+                <button class="btn btn-primary" onclick="exportReport()">
+                    <i class="bi bi-download"></i> Export Report
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section-content active">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalMembers">0</h3>
+                                <p class="text-muted mb-0">Total Members</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="paidThisCycle">0</h3>
+                                <p class="text-muted mb-0">Paid This Cycle</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="unpaidThisCycle">0</h3>
+                                <p class="text-muted mb-0">Unpaid This Cycle</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="attendanceRate">0%</h3>
+                                <p class="text-muted mb-0">Attendance Rate</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h5 class="mb-1" id="nextDrawDate">-</h5>
+                                <p class="text-muted mb-0">Next Draw Date</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-calendar-event"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="pendingLoans">0</h3>
+                                <p class="text-muted mb-0">Pending Loans</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-hourglass-split"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="groupWallet">0</h3>
+                                <p class="text-muted mb-0">Group Wallet</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-wallet2"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div id="recentActivity">
+                        <!-- Recent activities will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div id="members-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Member Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal">
+                        <i class="bi bi-plus-circle"></i> Add Member
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3" id="membersGrid">
+                        <!-- Members will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributions Section -->
+        <div id="contributions-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Contribution Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordContributionModal">
+                        <i class="bi bi-plus-circle"></i> Record Payment
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Amount</th>
+                                    <th>Cycle</th>
+                                    <th>Status</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contributionsTable">
+                                <!-- Contributions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Section -->
+        <div id="attendance-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Attendance Management</h5>
+                    <div>
+                        <input type="date" class="form-control d-inline-block w-auto me-2" id="meetingDate">
+                        <button class="btn btn-primary" onclick="markAttendanceMode()">
+                            <i class="bi bi-check2-square"></i> Mark Attendance
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3" id="attendanceGrid">
+                        <!-- Attendance will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Smart Draw Section -->
+        <div id="draw-section" class="section-content">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Smart Draw System</h5>
+                        </div>
+                        <div class="card-body text-center">
+                            <div class="draw-wheel" id="drawWheel">
+                                <i class="bi bi-dice-5" style="font-size: 3rem; color: #667eea;"></i>
+                            </div>
+                            <h4 class="mt-3" id="drawStatus">Ready to Draw</h4>
+                            <p class="text-muted" id="eligibleCount">0 eligible members</p>
+                            <button class="btn btn-primary btn-lg mt-3" id="startDrawBtn" onclick="startDraw()">
+                                <i class="bi bi-play-circle"></i> Start Draw
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Draw History</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="drawHistory">
+                                <!-- Draw history will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loans Section -->
+        <div id="loans-section" class="section-content">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Loan Management</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Amount</th>
+                                    <th>Reason</th>
+                                    <th>Status</th>
+                                    <th>Balance</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loansTable">
+                                <!-- Loans will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Meetings Section -->
+        <div id="meetings-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Meeting Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#scheduleMeetingModal">
+                        <i class="bi bi-plus-circle"></i> Schedule Meeting
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div id="meetingsList">
+                        <!-- Meetings will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Voting Section -->
+        <div id="voting-section" class="section-content">
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="mb-0">Voting Management</h5>
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#startVotingModal">
+                                <i class="bi bi-plus-circle"></i> Start Voting
+                            </button>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <label for="votingType" class="form-label">Voting Type</label>
+                                <select class="form-select" id="votingType">
+                                    <option value="simple">Simple Majority</option>
+                                    <option value="weighted">Weighted Voting</option>
+                                    <option value="consensus">Consensus</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="votingRules" class="form-label">Voting Rules</label>
+                                <textarea class="form-control" id="votingRules" rows="3" placeholder="Enter voting rules..."></textarea>
+                            </div>
+                            <div class="mb-3">
+                                <label for="votingDuration" class="form-label">Duration (minutes)</label>
+                                <input type="number" class="form-control" id="votingDuration" value="30">
+                            </div>
+                            <button class="btn btn-primary w-100" onclick="startVotingSession()">
+                                <i class="bi bi-play-circle"></i> Start Voting Session
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Current Voting Status</h5>
+                        </div>
+                        <div class="card-body">
+                            <div id="votingStatus">
+                                <div class="text-center text-muted">
+                                    <i class="bi bi-info-circle" style="font-size: 3rem;"></i>
+                                    <p class="mt-3">No active voting session</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Voting History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Topic</th>
+                                    <th>Winner</th>
+                                    <th>Payment Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="votingHistory">
+                                <!-- Voting history will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fines Section -->
+        <div id="fines-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Fine Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFineModal">
+                        <i class="bi bi-plus-circle"></i> Create Fine
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="totalFines">0</h3>
+                                        <p class="text-muted mb-0">Total Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-cash-coin"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="paidFines">0</h3>
+                                        <p class="text-muted mb-0">Paid Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="pendingFines">0</h3>
+                                        <p class="text-muted mb-0">Pending Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="unpaidFines">0</h3>
+                                        <p class="text-muted mb-0">Unpaid Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-x-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finesTable">
+                                <!-- Fines will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Send Notifications</h5>
+                </div>
+                <div class="card-body">
+                    <form id="notificationForm">
+                        <div class="mb-3">
+                            <label for="notificationTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="notificationTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="notificationMessage" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notificationType" class="form-label">Type</label>
+                            <select class="form-select" id="notificationType">
+                                <option value="meeting">Meeting Reminder</option>
+                                <option value="payment">Payment Reminder</option>
+                                <option value="draw">Draw Announcement</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="bi bi-send"></i> Send Notification
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal fade" id="addMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add New Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMemberForm">
+                        <div class="mb-3">
+                            <label for="memberName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="memberName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="memberEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="memberPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="memberPassword" value="123456">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addMember()">Add Member</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Contribution Modal -->
+    <div class="modal fade" id="recordContributionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Record Contribution</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordContributionForm">
+                        <div class="mb-3">
+                            <label for="contributionMember" class="form-label">Member</label>
+                            <select class="form-select" id="contributionMember" required>
+                                <option value="">Select Member</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contributionAmount" class="form-label">Amount</label>
+                            <input type="number" class="form-control" id="contributionAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contributionCycle" class="form-label">Payment Cycle</label>
+                            <input type="text" class="form-control" id="contributionCycle" placeholder="e.g., Week 1">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="recordContribution()">Record Payment</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Draw Winner Modal -->
+    <div class="modal fade" id="drawWinnerModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-success text-white">
+                    <h5 class="modal-title">🎉 Draw Winner!</h5>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body text-center">
+                    <div class="winner-animation">
+                        <i class="bi bi-trophy" style="font-size: 4rem; color: #ffc107;"></i>
+                    </div>
+                    <h3 id="winnerName" class="mt-3"></h3>
+                    <p class="text-muted">Member Number: <span id="winnerNumber"></span></p>
+                    <h4 class="text-success">Amount Won: RWF <span id="winnerAmount">0</span></h4>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-primary" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Start Voting Modal -->
+    <div class="modal fade" id="startVotingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Start Voting Session</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="startVotingForm">
+                        <div class="mb-3">
+                            <label for="votingTopic" class="form-label">Voting Topic</label>
+                            <input type="text" class="form-control" id="votingTopic" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="votingDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="votingDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="votingTypeModal" class="form-label">Voting Type</label>
+                            <select class="form-select" id="votingTypeModal" required>
+                                <option value="simple">Simple Majority</option>
+                                <option value="weighted">Weighted Voting</option>
+                                <option value="consensus">Consensus</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="votingDurationModal" class="form-label">Duration (minutes)</label>
+                            <input type="number" class="form-control" id="votingDurationModal" value="30" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="startVoting()">Start Voting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Fine Modal -->
+    <div class="modal fade" id="createFineModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Fine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createFineForm">
+                        <div class="mb-3">
+                            <label for="fineMember" class="form-label">Member</label>
+                            <select class="form-select" id="fineMember" required>
+                                <option value="">Select Member</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineType" class="form-label">Fine Type</label>
+                            <select class="form-select" id="fineType" required>
+                                <option value="late_payment">Late Payment</option>
+                                <option value="absence">Meeting Absence</option>
+                                <option value="violation">Rule Violation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineAmount" class="form-label">Amount (RWF)</label>
+                            <input type="number" class="form-control" id="fineAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineReason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="fineReason" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createFine()">Create Fine</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Schedule Meeting Modal -->
+    <div class="modal fade" id="scheduleMeetingModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Schedule Meeting</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="scheduleMeetingForm">
+                        <div class="mb-3">
+                            <label for="meetingTitle" class="form-label">Meeting Title</label>
+                            <input type="text" class="form-control" id="meetingTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="meetingDate" class="form-label">Date</label>
+                            <input type="datetime-local" class="form-control" id="meetingDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="meetingLocation" class="form-label">Location</label>
+                            <input type="text" class="form-control" id="meetingLocation" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="meetingAgenda" class="form-label">Agenda</label>
+                            <textarea class="form-control" id="meetingAgenda" rows="4" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="scheduleMeeting()">Schedule Meeting</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentData = {};
+        let isDrawing = false;
+
+        // Authentication check
+        let authChecked = false;
+        function checkAuth() {
+            if (authChecked) {
+                console.log('Auth already checked, preventing redirect loop');
+                return JSON.parse(sessionStorage.getItem('user') || '{}');
+            }
+            
+            const user = sessionStorage.getItem('user');
+            console.log('Chief dashboard - Checking auth, user:', user);
+            if (!user) {
+                console.log('Chief dashboard - No user found, redirecting to login');
+                window.location.href = '/login';
+                return false;
+            }
+            try {
+                const parsedUser = JSON.parse(user);
+                console.log('Chief dashboard - User authenticated:', parsedUser);
+                authChecked = true;
+                return parsedUser;
+            } catch (error) {
+                console.error('Chief dashboard - Error parsing user data:', error);
+                sessionStorage.removeItem('user');
+                window.location.href = '/login';
+                return false;
+            }
+        }
+
+        async function apiCall(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const finalOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+            
+            try {
+                const response = await fetch(url, finalOptions);
+                
+                // Don't clear sessionStorage on 401, let's auth check handle it
+                if (!response.ok) {
+                    console.error('API call failed:', response.status, response.statusText);
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call error:', error);
+                return null;
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        // Section Management
+        function showSection(evt, section) {
+            evt.preventDefault();
+            const sections = ['dashboard', 'members', 'contributions', 'attendance', 'draw', 'loans', 'meetings', 'notifications', 'voting', 'fines'];
+            sections.forEach(s => {
+                const element = document.getElementById(`${s}-section`);
+                if (element) {
+                    element.classList.toggle('active', s === section);
+                    element.style.display = s === section ? 'block' : 'none';
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            const clickedLink = evt.target.closest('.nav-link');
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
+
+            loadData(section);
+        }
+
+        async function loadData(section) {
+            switch(section) {
+                case 'dashboard':
+                    await loadDashboard();
+                    break;
+                case 'members':
+                    await loadMembers();
+                    break;
+                case 'contributions':
+                    await loadContributions();
+                    break;
+                case 'attendance':
+                    await loadAttendance();
+                    break;
+                case 'draw':
+                    await loadDrawData();
+                    break;
+                case 'voting':
+                    await loadVoting();
+                    break;
+                case 'fines':
+                    await loadFines();
+                    break;
+                case 'loans':
+                    await loadLoans();
+                    break;
+                case 'meetings':
+                    await loadMeetings();
+                    break;
+                case 'notifications':
+                    await loadNotifications();
+                    break;
+            }
+        }
+
+        // Dashboard Functions
+        async function loadDashboard() {
+            const groupData = await apiCall('/api/chief/my-group');
+            const membersData = await apiCall('/api/chief/members');
+            
+            if (groupData && membersData) {
+                const group = groupData.group;
+                const members = membersData.members;
+                
+                document.getElementById('totalMembers').textContent = members.length;
+                document.getElementById('nextDrawDate').textContent = group.draw_day || 'Not set';
+                
+                // Calculate statistics
+                const paidCount = members.filter(m => m.status === 'active').length;
+                document.getElementById('paidThisCycle').textContent = paidCount;
+                document.getElementById('unpaidThisCycle').textContent = members.length - paidCount;
+                document.getElementById('attendanceRate').textContent = Math.round((paidCount / members.length) * 100) + '%';
+                
+                // Load recent activity
+                loadRecentActivity();
+            }
+        }
+
+        // Members Functions
+        async function loadMembers() {
+            const data = await apiCall('/api/chief/members');
+            if (data) {
+                displayMembers(data.members);
+                // Populate fine member dropdown
+                const fineMemberSelect = document.getElementById('fineMember');
+                if (fineMemberSelect) {
+                    const memberOptions = data.members.map(m => `<option value="${m.id}">${m.full_name}</option>`).join('');
+                    fineMemberSelect.innerHTML = '<option value="">Select Member</option>' + memberOptions;
+                }
+            }
+        }
+
+        // Contributions Functions
+        async function loadContributions() {
+            const data = await apiCall('/api/chief/contributions');
+            const tbody = document.getElementById('contributionsTable');
+            if (!tbody) return;
+
+            const contributions = data?.contributions || [];
+            if (!contributions.length) {
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No contributions recorded yet</td></tr>';
+                return;
+            }
+
+            tbody.innerHTML = contributions.map(contribution => `
+                <tr>
+                    <td>${contribution.member_name || 'N/A'}</td>
+                    <td>RWF ${Number(contribution.amount || 0).toLocaleString()}</td>
+                    <td>${contribution.payment_cycle || 'N/A'}</td>
+                    <td><span class="badge bg-${contribution.status === 'paid' ? 'success' : 'warning'}">${contribution.status || 'pending'}</span></td>
+                    <td>${contribution.created_at ? new Date(contribution.created_at).toLocaleDateString() : '-'}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="showNotification('Contribution details coming soon', 'info')">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        // Attendance Functions
+        async function loadAttendance() {
+            const data = await apiCall('/api/chief/attendance');
+            const grid = document.getElementById('attendanceGrid');
+            if (!grid) return;
+
+            const attendance = data?.attendance || [];
+            if (!attendance.length) {
+                grid.innerHTML = '<div class="col-12 text-center text-muted">No attendance records yet</div>';
+                return;
+            }
+
+            grid.innerHTML = attendance.map(record => `
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="mb-1">${record.member_name || 'N/A'}</h6>
+                            <p class="mb-1"><strong>Date:</strong> ${record.meeting_date ? new Date(record.meeting_date).toLocaleDateString() : '-'}</p>
+                            <p class="mb-0"><strong>Status:</strong> <span class="badge bg-${record.status === 'present' ? 'success' : record.status === 'late' ? 'warning' : 'danger'}">${record.status || 'absent'}</span></p>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function markAttendanceMode() {
+            showNotification('Attendance marking mode activated', 'info');
+        }
+
+        // Voting Functions
+        async function loadVoting() {
+            const data = await apiCall('/api/chief/voting');
+            if (data) {
+                displayVotingHistory(data.votingHistory);
+                updateVotingStatus(data.activeVoting);
+            }
+        }
+
+        function displayVotingHistory(votingHistory) {
+            const tbody = document.getElementById('votingHistory');
+            tbody.innerHTML = votingHistory.map(voting => `
+                <tr>
+                    <td>${new Date(voting.created_at).toLocaleDateString()}</td>
+                    <td><span class="badge bg-info">${voting.type}</span></td>
+                    <td>${voting.topic}</td>
+                    <td>${voting.winner || 'Pending'}</td>
+                    <td><span class="badge bg-${voting.payment_status === 'paid' ? 'success' : 'warning'}">${voting.payment_status || 'N/A'}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewVotingDetails(${voting.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="confirmWinner(${voting.id})" ${voting.winner ? 'disabled' : ''}>
+                            <i class="bi bi-check"></i> Confirm
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateVotingStatus(activeVoting) {
+            const statusDiv = document.getElementById('votingStatus');
+            if (activeVoting) {
+                statusDiv.innerHTML = `
+                    <div class="text-center">
+                        <div class="spinner-border text-primary" role="status">
+                            <span class="visually-hidden">Loading...</span>
+                        </div>
+                        <h6 class="mt-3">Voting in Progress</h6>
+                        <p class="text-muted">${activeVoting.topic}</p>
+                        <small>Ends: ${new Date(activeVoting.end_time).toLocaleString()}</small>
+                    </div>
+                `;
+            } else {
+                statusDiv.innerHTML = `
+                    <div class="text-center text-muted">
+                        <i class="bi bi-info-circle" style="font-size: 3rem;"></i>
+                        <p class="mt-3">No active voting session</p>
+                    </div>
+                `;
+            }
+        }
+
+        async function startVotingSession() {
+            const form = document.getElementById('startVotingForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            const response = await apiCall('/api/chief/voting', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('startVotingModal')).hide();
+                form.reset();
+                showNotification('Voting session started successfully', 'success');
+                loadVoting();
+            }
+        }
+
+        async function confirmWinner(votingId) {
+            const response = await apiCall(`/api/chief/voting/${votingId}/confirm`, {
+                method: 'POST'
+            });
+
+            if (response) {
+                showNotification('Winner confirmed successfully', 'success');
+                loadVoting();
+            }
+        }
+
+        // Fines Functions
+        async function loadFines() {
+            const data = await apiCall('/api/chief/fines');
+            if (data) {
+                displayFines(data.fines);
+                // Update statistics
+                const stats = data.statistics;
+                document.getElementById('totalFines').textContent = stats.total || 0;
+                document.getElementById('paidFines').textContent = stats.paid || 0;
+                document.getElementById('pendingFines').textContent = stats.pending || 0;
+                document.getElementById('unpaidFines').textContent = stats.unpaid || 0;
+            }
+        }
+
+        function displayFines(fines) {
+            const tbody = document.getElementById('finesTable');
+            tbody.innerHTML = fines.map(fine => `
+                <tr>
+                    <td>${fine.member_name}</td>
+                    <td><span class="badge bg-warning">${fine.fine_type}</span></td>
+                    <td>RWF ${fine.amount.toLocaleString()}</td>
+                    <td>${new Date(fine.created_at).toLocaleDateString()}</td>
+                    <td><span class="badge bg-${fine.status === 'paid' ? 'success' : fine.status === 'pending' ? 'warning' : 'danger'}">${fine.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editFine(${fine.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="markFinePaid(${fine.id})" ${fine.status === 'paid' ? 'disabled' : ''}>
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createFine() {
+            const form = document.getElementById('createFineForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            const response = await apiCall('/api/chief/fines', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('createFineModal')).hide();
+                form.reset();
+                showNotification('Fine created successfully', 'success');
+                loadFines();
+            }
+        }
+
+        // Meetings Functions
+        async function loadMeetings() {
+            const data = await apiCall('/api/chief/meetings');
+            if (data) {
+                displayMeetings(data.meetings);
+            }
+        }
+
+        function displayMeetings(meetings) {
+            const meetingsList = document.getElementById('meetingsList');
+            meetingsList.innerHTML = meetings.map(meeting => `
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-body">
+                            <h6 class="card-title">${meeting.title}</h6>
+                            <p class="card-text">
+                                <strong>Date:</strong> ${new Date(meeting.meeting_date).toLocaleString()}<br>
+                                <strong>Location:</strong> ${meeting.location}<br>
+                                <strong>Status:</strong> 
+                                <span class="badge bg-${meeting.status === 'completed' ? 'success' : meeting.status === 'ongoing' ? 'primary' : 'warning'}">
+                                    ${meeting.status}
+                                </span>
+                            </p>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-info" onclick="viewMeetingDetails(${meeting.id})">
+                                    <i class="bi bi-eye"></i> Details
+                                </button>
+                                <button class="btn btn-sm btn-primary" onclick="recordMeetingNotes(${meeting.id})" ${meeting.status !== 'completed' ? 'disabled' : ''}>
+                                    <i class="bi bi-journal-text"></i> Record Notes
+                                </button>
+                                <button class="btn btn-sm btn-success" onclick="generateWeeklyReport(${meeting.id})">
+                                    <i class="bi bi-file-earmark-text"></i> Weekly Report
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        async function scheduleMeeting() {
+            const form = document.getElementById('scheduleMeetingForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            const response = await apiCall('/api/chief/meetings', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('scheduleMeetingModal')).hide();
+                form.reset();
+                showNotification('Meeting scheduled successfully', 'success');
+                loadMeetings();
+            }
+        }
+
+        // Notifications Functions
+        async function loadNotifications() {
+            const data = await apiCall('/api/chief/notifications');
+            const form = document.getElementById('notificationForm');
+            if (form && !form.dataset.boundSubmit) {
+                form.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    const payload = {
+                        title: document.getElementById('notificationTitle')?.value || '',
+                        message: document.getElementById('notificationMessage')?.value || '',
+                        type: document.getElementById('notificationType')?.value || 'general'
+                    };
+
+                    const response = await apiCall('/api/chief/notifications', {
+                        method: 'POST',
+                        body: JSON.stringify(payload)
+                    });
+
+                    if (response) {
+                        form.reset();
+                        showNotification('Notification sent successfully', 'success');
+                    }
+                });
+                form.dataset.boundSubmit = 'true';
+            }
+
+            if (!data) {
+                return;
+            }
+        }
+
+        async function generateWeeklyReport() {
+            const response = await apiCall('/api/chief/reports/weekly', {
+                method: 'POST'
+            });
+
+            if (response) {
+                showNotification('Weekly report generated successfully', 'success');
+                // Download or display the report
+                window.open(response.reportUrl, '_blank');
+            }
+        }
+
+        // Enhanced Loans Functions
+        async function loadLoans() {
+            const data = await apiCall('/api/chief/loans');
+            if (data) {
+                displayLoans(data.loans);
+            }
+        }
+
+        function displayLoans(loans) {
+            const tbody = document.getElementById('loansTable');
+            tbody.innerHTML = loans.map(loan => `
+                <tr>
+                    <td>${loan.member_name}</td>
+                    <td>RWF ${loan.amount.toLocaleString()}</td>
+                    <td>${loan.reason}</td>
+                    <td><span class="badge bg-${loan.status === 'approved' ? 'success' : loan.status === 'pending' ? 'warning' : 'danger'}">${loan.status}</span></td>
+                    <td>RWF ${loan.balance.toLocaleString()}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewLoanDetails(${loan.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="recommendLoan(${loan.id})" ${loan.status !== 'pending' ? 'disabled' : ''}>
+                            <i class="bi bi-hand-thumbs-up"></i> Recommend
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="rejectLoan(${loan.id})" ${loan.status !== 'pending' ? 'disabled' : ''}>
+                            <i class="bi bi-hand-thumbs-down"></i> Reject
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function recommendLoan(loanId) {
+            const response = await apiCall(`/api/chief/loans/${loanId}/recommend`, {
+                method: 'POST'
+            });
+
+            if (response) {
+                showNotification('Loan recommended to admin successfully', 'success');
+                loadLoans();
+            }
+        }
+
+        async function rejectLoan(loanId) {
+            const reason = prompt('Please enter rejection reason:');
+            if (!reason) return;
+
+            const response = await apiCall(`/api/chief/loans/${loanId}/reject`, {
+                method: 'POST',
+                body: JSON.stringify({ reason })
+            });
+
+            if (response) {
+                showNotification('Loan rejected successfully', 'success');
+                loadLoans();
+            }
+        }
+
+        function displayMembers(members) {
+            const grid = document.getElementById('membersGrid');
+            grid.innerHTML = members.map(member => `
+                <div class="col-md-4">
+                    <div class="card member-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <h6 class="card-title">${member.full_name}</h6>
+                                    <p class="text-muted mb-1">Member #${member.member_number}</p>
+                                    <p class="text-muted mb-1">${member.phone}</p>
+                                </div>
+                                <span class="badge ${member.status === 'active' ? 'bg-success' : 'bg-danger'}">${member.status}</span>
+                            </div>
+                            <div class="mt-3">
+                                <button class="btn btn-sm btn-outline-primary me-1" onclick="viewMember(${member.id})">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-warning me-1" onclick="editMember(${member.id})">
+                                    <i class="bi bi-pencil"></i>
+                                </button>
+                                <button class="btn btn-sm btn-outline-danger" onclick="removeMember(${member.id})">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        // Smart Draw Functions
+        async function loadDrawData() {
+            const data = await apiCall('/api/chief/draw-eligibility');
+            if (data) {
+                document.getElementById('eligibleCount').textContent = `${data.eligibleCount} eligible members`;
+                loadDrawHistory();
+            }
+        }
+
+        async function startDraw() {
+            if (isDrawing) return;
+            
+            isDrawing = true;
+            const wheel = document.getElementById('drawWheel');
+            const btn = document.getElementById('startDrawBtn');
+            const status = document.getElementById('drawStatus');
+            
+            wheel.classList.add('spinning');
+            btn.disabled = true;
+            status.textContent = 'Drawing in progress...';
+            
+            const response = await apiCall('/api/chief/start-draw', {
+                method: 'POST'
+            });
+            
+            wheel.classList.remove('spinning');
+            
+            if (response) {
+                status.textContent = 'Draw Complete!';
+                showDrawWinner(response.winner, response.totalAmount);
+            } else {
+                status.textContent = 'Draw failed. Please try again.';
+            }
+            
+            btn.disabled = false;
+            isDrawing = false;
+        }
+
+        function addMember() {
+            showNotification('Add member feature is in progress', 'info');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addMemberModal'));
+            modal?.hide();
+        }
+
+        function recordContribution() {
+            showNotification('Contribution recording submitted', 'success');
+            const modal = bootstrap.Modal.getInstance(document.getElementById('recordContributionModal'));
+            modal?.hide();
+        }
+
+        function startVoting() {
+            startVotingSession();
+        }
+
+        function showDrawWinner(winner, amount) {
+            document.getElementById('winnerName').textContent = winner.name;
+            document.getElementById('winnerNumber').textContent = winner.memberNumber;
+            document.getElementById('winnerAmount').textContent = amount.toLocaleString();
+            
+            const modal = new bootstrap.Modal(document.getElementById('drawWinnerModal'));
+            modal.show();
+        }
+
+        // Utility Functions
+        function refreshData() {
+            const activeSection = document.querySelector('.section-content.active').id.replace('-section', '');
+            loadData(activeSection);
+            showNotification('Data refreshed', 'info');
+        }
+
+        function exportReport() {
+            showNotification('Generating report...', 'info');
+            // Implementation would go here
+        }
+
+        function loadRecentActivity() {
+            const recentActivity = document.getElementById('recentActivity');
+            if (!recentActivity) return;
+            recentActivity.innerHTML = `
+                <div class="text-muted d-flex align-items-center">
+                    <i class="bi bi-info-circle me-2"></i>
+                    <span>No recent activity to display</span>
+                </div>
+            `;
+        }
+
+        function showNotification(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a moment for sessionStorage to be ready
+            setTimeout(() => {
+                const auth = checkAuth();
+                if (auth) {
+                    console.log('Page loaded with authenticated user:', auth);
+                    loadDashboard();
+                }
+            }, 100);
+            
+            // Set today's date for attendance
+            document.getElementById('meetingDate').valueAsDate = new Date();
+        });
+    </script>
+</body>
+</html>

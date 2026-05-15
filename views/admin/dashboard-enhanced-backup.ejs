@@ -1,0 +1,22 @@
+function showSection(evt, section) {
+            evt.preventDefault();
+            const sections = ['dashboard', 'groups', 'chiefs', 'members', 'contributions', 'loans', 'attendance', 'notifications', 'fines', 'reports', 'audit'];
+            sections.forEach(s => {
+                const element = document.getElementById(`${s}-section`);
+                if (element) {
+                    element.classList.toggle('active', s === section);
+                    element.style.display = s === section ? 'block' : 'none';
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            // Find the clicked link and add active class
+            const clickedLink = evt.target.closest('.nav-link');
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
+
+            loadData(section);
+        }

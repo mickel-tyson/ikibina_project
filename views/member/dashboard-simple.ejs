@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: 250px;
+            background: var(--primary-gradient);
+            z-index: 1000;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .main-content {
+            margin-left: 250px;
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: var(--primary-gradient);
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .user-info {
+            color: white;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .profile-card {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            text-align: center;
+        }
+        
+        .member-number {
+            font-size: 2rem;
+            font-weight: bold;
+            background: rgba(255, 255, 255, 0.2);
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            display: inline-block;
+        }
+        
+        .contribution-card {
+            transition: all 0.3s;
+        }
+        
+        .contribution-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="navbar-brand">
+                <i class="bi bi-shield-check me-2"></i>
+                Ikibina Guardian
+            </div>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('profile')">
+                    <i class="bi bi-person me-2"></i> My Profile
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('contributions')">
+                    <i class="bi bi-cash-stack me-2"></i> My Contributions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('attendance')">
+                    <i class="bi bi-calendar-check me-2"></i> Attendance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('draw')">
+                    <i class="bi bi-dice-5 me-2"></i> Smart Draw
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('loans')">
+                    <i class="bi bi-bank me-2"></i> Loans
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection('notifications')">
+                    <i class="bi bi-bell me-2"></i> Notifications
+                </a>
+            </li>
+        </ul>
+        
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-circle me-2"></i>
+                <div>
+                    <div class="fw-bold"><%= user.full_name %></div>
+                    <small>Member</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-light mt-2 w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Member Dashboard</h1>
+            <div>
+                <button class="btn btn-outline-secondary me-2" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+                <button class="btn btn-primary" onclick="downloadReceipts()">
+                    <i class="bi bi-download"></i> Download Receipts
+                </button>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section-content active">
+            <!-- Profile Card -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-4">
+                    <div class="profile-card">
+                        <i class="bi bi-person-circle" style="font-size: 4rem;"></i>
+                        <h4 id="profileName">Loading...</h4>
+                        <p id="profileEmail">Loading...</p>
+                        <div class="member-number mt-3">
+                            Member #<span id="memberNumber">---</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-8">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" id="groupName">Loading...</h5>
+                                        <p class="text-muted mb-0">My Group</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-people"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" id="contributionAmount">RWF 0</h5>
+                                        <p class="text-muted mb-0">Contribution Amount</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" id="paymentStatus">-</h5>
+                                        <p class="text-muted mb-0">Payment Status</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h5 class="mb-1" id="nextDrawDate">-</h5>
+                                        <p class="text-muted mb-0">Next Draw Date</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-calendar-event"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Stats -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalContributions">0</h3>
+                                <p class="text-muted mb-0">Total Contributions</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-cash"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="missedPayments">0</h3>
+                                <p class="text-muted mb-0">Missed Payments</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-x-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="attendanceRate">0%</h3>
+                                <p class="text-muted mb-0">Attendance Rate</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-graph-up"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="loanBalance">0</h3>
+                                <p class="text-muted mb-0">Loan Balance</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-bank"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Recent Activity -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Recent Activity</h5>
+                </div>
+                <div class="card-body">
+                    <div id="recentActivity">
+                        <div class="d-flex align-items-center text-muted">
+                            <i class="bi bi-info-circle me-2"></i>
+                            <span>No recent activity to display</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Section -->
+        <div id="profile-section" class="section-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">My Profile</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Full Name:</strong> <span id="profileFullName">Loading...</span></p>
+                            <p><strong>Email:</strong> <span id="profileEmailField">Loading...</span></p>
+                            <p><strong>Phone:</strong> <span id="profilePhone">Loading...</span></p>
+                            <p><strong>Member Number:</strong> <span id="profileMemberNumber">Loading...</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Group:</strong> <span id="profileGroup">Loading...</span></p>
+                            <p><strong>Contribution Amount:</strong> <span id="profileContribution">RWF 0</span></p>
+                            <p><strong>Frequency:</strong> <span id="profileFrequency">-</span></p>
+                            <p><strong>Status:</strong> <span class="badge bg-success">Active</span></p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributions Section -->
+        <div id="contributions-section" class="section-content" style="display: none;">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">My Contribution History</h5>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Cycle</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contributionsTable">
+                                <!-- Contributions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Other sections would be added here -->
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // API helper function (NO TOKENS NEEDED!)
+        async function apiCall(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            console.log('Making API call to:', url);
+            
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            
+            if (response.status === 401) {
+                console.error('Not authenticated, redirecting to login');
+                window.location.href = '/login';
+                return null;
+            }
+            
+            return response.json();
+        }
+
+        function logout() {
+            // Call logout API to clear session
+            fetch('/api/auth/logout', { method: 'POST' })
+                .then(() => {
+                    window.location.href = '/login';
+                })
+                .catch(() => {
+                    window.location.href = '/login';
+                });
+        }
+
+        function showSection(section) {
+            // Hide all sections
+            document.querySelectorAll('.section-content').forEach(el => {
+                el.style.display = 'none';
+            });
+            
+            // Show selected section
+            const sectionElement = document.getElementById(section + '-section');
+            if (sectionElement) {
+                sectionElement.style.display = 'block';
+            }
+            
+            // Update nav links
+            document.querySelectorAll('.nav-link').forEach(link => {
+                link.classList.remove('active');
+            });
+            event.target.classList.add('active');
+            
+            // Load data for section
+            if (section === 'contributions') {
+                loadContributions();
+            }
+        }
+
+        async function loadDashboard() {
+            try {
+                const data = await apiCall('/api/member/profile');
+                if (data) {
+                    const userData = data.user;
+                    const membership = data.membership;
+                    
+                    // Update profile info
+                    document.getElementById('profileName').textContent = userData.full_name;
+                    document.getElementById('profileEmail').textContent = userData.email;
+                    document.getElementById('memberNumber').textContent = membership?.member_number || 'N/A';
+                    document.getElementById('profileFullName').textContent = userData.full_name;
+                    document.getElementById('profileEmailField').textContent = userData.email;
+                    document.getElementById('profilePhone').textContent = userData.phone || 'N/A';
+                    document.getElementById('profileMemberNumber').textContent = membership?.member_number || 'N/A';
+                    
+                    // Update group info
+                    if (membership) {
+                        document.getElementById('groupName').textContent = membership.group_name || 'No group';
+                        document.getElementById('contributionAmount').textContent = `RWF ${membership.contribution_amount?.toLocaleString() || 0}`;
+                        document.getElementById('nextDrawDate').textContent = membership.draw_day || 'Not set';
+                        document.getElementById('paymentStatus').textContent = 'Current';
+                        document.getElementById('profileGroup').textContent = membership.group_name || 'No group';
+                        document.getElementById('profileContribution').textContent = `RWF ${membership.contribution_amount?.toLocaleString() || 0}`;
+                        document.getElementById('profileFrequency').textContent = membership.frequency || '-';
+                    }
+                }
+                
+                // Load contributions for stats
+                const contributionsData = await apiCall('/api/member/contributions');
+                if (contributionsData && contributionsData.contributions) {
+                    const contributions = contributionsData.contributions;
+                    const total = contributions.reduce((sum, c) => sum + c.amount, 0);
+                    const missed = contributions.filter(c => c.payment_status === 'missed').length;
+                    
+                    document.getElementById('totalContributions').textContent = total.toLocaleString();
+                    document.getElementById('missedPayments').textContent = missed;
+                    document.getElementById('attendanceRate').textContent = '95%';
+                    document.getElementById('loanBalance').textContent = 'RWF 0';
+                }
+                
+            } catch (error) {
+                console.error('Error loading dashboard:', error);
+                // Show default values
+                document.getElementById('profileName').textContent = user.full_name;
+                document.getElementById('profileEmail').textContent = user.email;
+                document.getElementById('memberNumber').textContent = 'N/A';
+                document.getElementById('groupName').textContent = 'No group assigned';
+            }
+        }
+
+        async function loadContributions() {
+            try {
+                const data = await apiCall('/api/member/contributions');
+                if (data && data.contributions) {
+                    const tbody = document.getElementById('contributionsTable');
+                    tbody.innerHTML = data.contributions.map(contribution => `
+                        <tr>
+                            <td>${new Date(contribution.paid_at).toLocaleDateString()}</td>
+                            <td>RWF ${contribution.amount.toLocaleString()}</td>
+                            <td>${contribution.payment_cycle || 'N/A'}</td>
+                            <td><span class="badge ${contribution.payment_status === 'paid' ? 'bg-success' : 'bg-danger'}">${contribution.payment_status}</span></td>
+                        </tr>
+                    `).join('');
+                }
+            } catch (error) {
+                console.error('Error loading contributions:', error);
+                document.getElementById('contributionsTable').innerHTML = '<tr><td colspan="4">No contributions found</td></tr>';
+            }
+        }
+
+        function refreshData() {
+            console.log('Refreshing member dashboard data...');
+            
+            // Show loading state
+            const refreshBtn = document.querySelector('button[onclick="refreshData()"]');
+            const originalText = refreshBtn.innerHTML;
+            refreshBtn.innerHTML = '<i class="bi bi-arrow-clockwise"></i> Refreshing...';
+            refreshBtn.disabled = true;
+            
+            // Refresh dashboard
+            loadDashboard();
+            
+            // Also refresh current section if not on dashboard
+            const currentSection = document.querySelector('.section-content:not([style*="display: none"])');
+            if (currentSection && currentSection.id !== 'dashboard-section') {
+                const sectionName = currentSection.id.replace('-section', '');
+                switch(sectionName) {
+                    case 'profile':
+                        loadProfile();
+                        break;
+                    case 'contributions':
+                        loadContributions();
+                        break;
+                    case 'attendance':
+                        loadAttendance();
+                        break;
+                    case 'draw':
+                        loadDraw();
+                        break;
+                    case 'loans':
+                        loadLoans();
+                        break;
+                    case 'notifications':
+                        loadNotifications();
+                        break;
+                }
+            }
+            
+            // Reset button after 1 second
+            setTimeout(() => {
+                refreshBtn.innerHTML = originalText;
+                refreshBtn.disabled = false;
+                console.log('Refresh completed');
+            }, 1000);
+        }
+
+        function downloadReceipts() {
+            alert('Download feature would be implemented here');
+        }
+
+        // Load dashboard on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>

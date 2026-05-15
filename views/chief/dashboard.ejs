@@ -1,0 +1,1057 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        .sidebar {
+            min-height: calc(100vh - 56px);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .sidebar .nav-link {
+            color: rgba(255,255,255,0.8);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin: 0.2rem 0;
+            transition: all 0.3s ease;
+        }
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255,255,255,0.1);
+        }
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: calc(100vh - 56px);
+        }
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+        }
+        .stats-card h3 {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+        .card {
+            border: none;
+            box-shadow: 0 0.125rem 0.25rem rgba(0,0,0,0.075);
+            border-radius: 0.5rem;
+        }
+        .card-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 0.5rem 0.5rem 0 0 !important;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        .navbar {
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-white">
+        <div class="container-fluid">
+            <a class="navbar-brand" href="/">
+                <i class="bi bi-shield-check"></i> Ikibina Guardian
+            </a>
+            <div class="navbar-nav ms-auto">
+                <div class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-bs-toggle="dropdown">
+                        <i class="bi bi-person-circle"></i> <span id="userName">Chief</span>
+                    </a>
+                    <ul class="dropdown-menu">
+                        <li><a class="dropdown-item" href="#" onclick="logout()"><i class="bi bi-box-arrow-right"></i> Logout</a></li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-md-3 sidebar p-3">
+                <h6 class="text-uppercase mb-3">Chief Panel</h6>
+                <nav class="nav flex-column">
+                    <a class="nav-link active" href="#" onclick="showSection('dashboard')">
+                        <i class="bi bi-speedometer2"></i> Dashboard
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('groups')">
+                        <i class="bi bi-collection"></i> My Groups
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('contributions')">
+                        <i class="bi bi-cash-stack"></i> Contributions
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('loans')">
+                        <i class="bi bi-bank"></i> Loans
+                    </a>
+                    <a class="nav-link" href="#" onclick="showSection('members')">
+                        <i class="bi bi-people"></i> Members
+                    </a>
+                </nav>
+            </div>
+
+            <div class="col-md-9 main-content p-4">
+                <!-- Dashboard Section -->
+                <div id="dashboard-section">
+                    <h2 class="mb-4">Chief Dashboard</h2>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="totalGroups">0</h3>
+                                <p class="mb-0">My Groups</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="totalLoans">0</h3>
+                                <p class="mb-0">Total Loans</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="pendingLoans">0</h3>
+                                <p class="mb-0">Pending Loans</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card">
+                                <h3 id="approvedLoans">0</h3>
+                                <p class="mb-0">Approved Loans</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">My Groups</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="myGroups" class="table-responsive">
+                                        <p class="text-muted">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="mb-0">Recent Loans</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recentLoans" class="table-responsive">
+                                        <p class="text-muted">Loading...</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Groups Section -->
+                <div id="groups-section" style="display: none;">
+                    <h2 class="mb-4">Manage Groups</h2>
+                    <button class="btn btn-primary mb-3" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                        <i class="bi bi-plus-circle"></i> Create New Group
+                    </button>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="allGroups" class="table-responsive">
+                                <p class="text-muted">Loading...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Contributions Section -->
+                <div id="contributions-section" style="display: none;">
+                    <h2 class="mb-4">Manage Contributions</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select" id="groupSelect" onchange="loadContributions()">
+                                <option value="">Select a group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordContributionModal">
+                                <i class="bi bi-plus-circle"></i> Record Contribution
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="contributionsList" class="table-responsive">
+                                <p class="text-muted">Select a group to view contributions</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Loans Section -->
+                <div id="loans-section" style="display: none;">
+                    <h2 class="mb-4">Manage Loans</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select" id="loanGroupSelect" onchange="loadLoans()">
+                                <option value="">Select a group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#issueLoanModal">
+                                <i class="bi bi-plus-circle"></i> Issue Loan
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="loansList" class="table-responsive">
+                                <p class="text-muted">Select a group to view loans</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Members Section -->
+                <div id="members-section" style="display: none;">
+                    <h2 class="mb-4">Manage Members</h2>
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <select class="form-select" id="memberGroupSelect" onchange="loadMembers()">
+                                <option value="">Select a group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMemberModal" onclick="loadAvailableMembers()">
+                                <i class="bi bi-plus-circle"></i> Add Member
+                            </button>
+                        </div>
+                    </div>
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="membersList" class="table-responsive">
+                                <p class="text-muted">Select a group to view members</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div class="modal fade" id="createGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createGroupForm">
+                        <div class="mb-3">
+                            <label for="groupName" class="form-label">Group Name</label>
+                            <input type="text" class="form-control" id="groupName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="groupDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="groupDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="groupVillage" class="form-label">Village</label>
+                            <input type="text" class="form-control" id="groupVillage" name="village" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createGroup()">Create Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGroupForm">
+                        <input type="hidden" id="editGroupId">
+                        <div class="mb-3">
+                            <label for="editGroupName" class="form-label">Group Name</label>
+                            <input type="text" class="form-control" id="editGroupName" name="name" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editGroupDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="editGroupDescription" name="description" rows="3"></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="editGroupVillage" class="form-label">Village</label>
+                            <input type="text" class="form-control" id="editGroupVillage" name="village" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="updateGroup()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Record Contribution Modal -->
+    <div class="modal fade" id="recordContributionModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Record Contribution</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="recordContributionForm">
+                        <div class="mb-3">
+                            <label for="contributionMember" class="form-label">Member</label>
+                            <select class="form-select" id="contributionMember" required>
+                                <option value="">Select member</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contributionAmount" class="form-label">Amount (RWF)</label>
+                            <input type="number" class="form-control" id="contributionAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="contributionDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="contributionDescription" rows="2"></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="recordContribution()">Record Contribution</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Issue Loan Modal -->
+    <div class="modal fade" id="issueLoanModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Issue Loan</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="issueLoanForm">
+                        <div class="mb-3">
+                            <label for="loanMember" class="form-label">Member</label>
+                            <select class="form-select" id="loanMember" required>
+                                <option value="">Select member</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loanAmount" class="form-label">Amount (RWF)</label>
+                            <input type="number" class="form-control" id="loanAmount" min="0" step="0.01" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loanInterest" class="form-label">Interest Rate (%)</label>
+                            <input type="number" class="form-control" id="loanInterest" min="0" step="0.01" value="5" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loanPeriod" class="form-label">Repayment Period (months)</label>
+                            <input type="number" class="form-control" id="loanPeriod" min="1" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="loanPurpose" class="form-label">Purpose</label>
+                            <textarea class="form-control" id="loanPurpose" rows="3" required></textarea>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="issueLoan()">Issue Loan</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Member Modal -->
+    <div class="modal fade" id="addMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Add Member to Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addMemberForm">
+                        <div class="mb-3">
+                            <label for="newMemberSelect" class="form-label">Select Client to Add</label>
+                            <select class="form-select" id="newMemberSelect" required>
+                                <option value="">Loading available members...</option>
+                            </select>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="addMember()">Add Member</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        let currentData = {};
+        let currentGroups = [];
+        let currentMembers = [];
+
+        function checkAuth() {
+            const token = localStorage.getItem('token');
+            const user = JSON.parse(localStorage.getItem('user') || '{}');
+            
+            if (!token || user.role !== 'chief') {
+                window.location.href = '/login';
+                return false;
+            }
+            
+            document.getElementById('userName').textContent = user.full_name || user.username;
+            return { token, user };
+        }
+
+        async function apiCall(url, options = {}) {
+            const auth = checkAuth();
+            if (!auth) return null;
+            
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Authorization': `Bearer ${auth.token}`
+                }
+            };
+            
+            const response = await fetch(url, { ...defaultOptions, ...options });
+            
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
+            
+            return response.json();
+        }
+
+        function logout() {
+            localStorage.removeItem('token');
+            localStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        function showSection(section) {
+            const sections = ['dashboard', 'groups', 'contributions', 'loans', 'members'];
+            sections.forEach(s => {
+                const element = document.getElementById(`${s}-section`);
+                if (element) {
+                    element.style.display = s === section ? 'block' : 'none';
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            event.target.classList.add('active');
+
+            loadData(section);
+        }
+
+        async function loadData(section) {
+            switch(section) {
+                case 'dashboard':
+                    await loadDashboard();
+                    break;
+                case 'groups':
+                    await loadGroups();
+                    break;
+                case 'contributions':
+                    await loadContributionGroups();
+                    break;
+                case 'loans':
+                    await loadLoanGroups();
+                    break;
+                case 'members':
+                    await loadMemberGroups();
+                    break;
+            }
+        }
+
+        async function loadDashboard() {
+            const data = await apiCall('/api/chief/dashboard');
+            if (data) {
+                currentData = data;
+                document.getElementById('totalGroups').textContent = data.stats.totalGroups;
+                document.getElementById('totalLoans').textContent = data.stats.totalLoans;
+                document.getElementById('pendingLoans').textContent = data.stats.pendingLoans;
+                document.getElementById('approvedLoans').textContent = data.stats.approvedLoans;
+
+                displayGroups(data.groups);
+                displayRecentLoans(data.recentLoans);
+            }
+        }
+
+        function displayGroups(groups) {
+            currentGroups = groups;
+            const container = document.getElementById('myGroups');
+            if (groups.length === 0) {
+                container.innerHTML = '<p class="text-muted">No groups found</p>';
+                return;
+            }
+
+            const html = `
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Village</th>
+                            <th>Created</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${groups.map(group => `
+                            <tr>
+                                <td>${group.name}</td>
+                                <td>${group.village}</td>
+                                <td>${new Date(group.created_at).toLocaleDateString()}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        function displayRecentLoans(loans) {
+            const container = document.getElementById('recentLoans');
+            if (loans.length === 0) {
+                container.innerHTML = '<p class="text-muted">No loans found</p>';
+                return;
+            }
+
+            const html = `
+                <table class="table table-sm">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Amount</th>
+                            <th>Status</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${loans.map(loan => `
+                            <tr>
+                                <td>${loan.member_name}</td>
+                                <td>RWF ${parseFloat(loan.amount).toLocaleString()}</td>
+                                <td><span class="badge bg-${getStatusColor(loan.status)}">${loan.status}</span></td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        async function loadGroups() {
+            const data = await apiCall('/api/chief/groups');
+            if (data) {
+                displayAllGroups(data.groups);
+            }
+        }
+
+        function displayAllGroups(groups) {
+            const container = document.getElementById('allGroups');
+            if (groups.length === 0) {
+                container.innerHTML = '<p class="text-muted">No groups found</p>';
+                return;
+            }
+
+            const html = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Description</th>
+                            <th>Village</th>
+                            <th>Created</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${groups.map(group => `
+                            <tr>
+                                <td>${group.name}</td>
+                                <td>${group.description || 'N/A'}</td>
+                                <td>${group.village}</td>
+                                <td>${new Date(group.created_at).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-info" onclick="viewGroupDetails(${group.id})">
+                                        <i class="bi bi-eye"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-warning" onclick="openEditGroupModal(${group.id}, '${group.name}', '${group.description || ''}', '${group.village}')">
+                                        <i class="bi bi-pencil"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteGroup(${group.id}, '${group.name}')">
+                                        <i class="bi bi-trash"></i>
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        async function loadContributionGroups() {
+            const data = await apiCall('/api/chief/groups');
+            if (data) {
+                populateGroupSelect('groupSelect', data.groups);
+            }
+        }
+
+        async function loadLoanGroups() {
+            const data = await apiCall('/api/chief/groups');
+            if (data) {
+                populateGroupSelect('loanGroupSelect', data.groups);
+            }
+        }
+
+        async function loadMemberGroups() {
+            const data = await apiCall('/api/chief/groups');
+            if (data) {
+                populateGroupSelect('memberGroupSelect', data.groups);
+            }
+        }
+
+        function populateGroupSelect(selectId, groups) {
+            const select = document.getElementById(selectId);
+            select.innerHTML = '<option value="">Select a group</option>';
+            groups.forEach(group => {
+                select.innerHTML += `<option value="${group.id}">${group.name}</option>`;
+            });
+        }
+
+        async function loadContributions() {
+            const groupId = document.getElementById('groupSelect').value;
+            if (!groupId) return;
+
+            const data = await apiCall(`/api/chief/groups/${groupId}/contributions`);
+            if (data) {
+                displayContributions(data.contributions, data.total);
+            }
+        }
+
+        function displayContributions(contributions, total) {
+            const container = document.getElementById('contributionsList');
+            if (contributions.length === 0) {
+                container.innerHTML = '<p class="text-muted">No contributions found</p>';
+                return;
+            }
+
+            const html = `
+                <div class="mb-3">
+                    <h5>Total Contributions: RWF ${parseFloat(total).toLocaleString()}</h5>
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Amount</th>
+                            <th>Date</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${contributions.map(contribution => `
+                            <tr>
+                                <td>${contribution.member_name}</td>
+                                <td>RWF ${parseFloat(contribution.amount).toLocaleString()}</td>
+                                <td>${new Date(contribution.contribution_date).toLocaleDateString()}</td>
+                                <td>${contribution.description || 'N/A'}</td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        async function loadLoans() {
+            const groupId = document.getElementById('loanGroupSelect').value;
+            if (!groupId) return;
+
+            const data = await apiCall(`/api/chief/groups/${groupId}/loans`);
+            if (data) {
+                displayLoans(data.loans);
+            }
+        }
+
+        function displayLoans(loans) {
+            const container = document.getElementById('loansList');
+            if (loans.length === 0) {
+                container.innerHTML = '<p class="text-muted">No loans found</p>';
+                return;
+            }
+
+            const html = `
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Member</th>
+                            <th>Amount</th>
+                            <th>Interest</th>
+                            <th>Purpose</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${loans.map(loan => `
+                            <tr>
+                                <td>${loan.member_name}</td>
+                                <td>RWF ${parseFloat(loan.amount).toLocaleString()}</td>
+                                <td>${loan.interest_rate}%</td>
+                                <td>${loan.purpose}</td>
+                                <td><span class="badge bg-${getStatusColor(loan.status)}">${loan.status}</span></td>
+                                <td>
+                                    ${loan.status === 'pending' ? `
+                                        <button class="btn btn-sm btn-success" onclick="updateLoanStatus(${loan.id}, 'approved')">
+                                            <i class="bi bi-check"></i> Approve
+                                        </button>
+                                        <button class="btn btn-sm btn-danger" onclick="updateLoanStatus(${loan.id}, 'rejected')">
+                                            <i class="bi bi-x"></i> Reject
+                                        </button>
+                                    ` : ''}
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        async function loadMembers() {
+            const groupId = document.getElementById('memberGroupSelect').value;
+            if (!groupId) {
+                document.getElementById('membersList').innerHTML = '<p class="text-muted">Select a group to view members</p>';
+                return;
+            }
+
+            const data = await apiCall(`/api/chief/groups/${groupId}/members`);
+            if (data) {
+                displayMembers(data.members, groupId);
+            }
+        }
+
+        function displayMembers(members, groupId) {
+            const container = document.getElementById('membersList');
+            if (members.length === 0) {
+                container.innerHTML = '<p class="text-muted">No members found in this group</p>';
+                return;
+            }
+
+            const html = `
+                <div class="alert alert-info">
+                    <i class="bi bi-people"></i> ${members.length} members in this group
+                </div>
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Username</th>
+                            <th>Phone</th>
+                            <th>Email</th>
+                            <th>Joined Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        ${members.map(member => `
+                            <tr>
+                                <td class="fw-bold">${member.full_name}</td>
+                                <td>${member.username}</td>
+                                <td>${member.phone || 'N/A'}</td>
+                                <td>${member.email}</td>
+                                <td>${new Date(member.joined_at).toLocaleDateString()}</td>
+                                <td>
+                                    <button class="btn btn-sm btn-danger" onclick="removeMember(${groupId}, ${member.id})">
+                                        <i class="bi bi-trash"></i> Remove
+                                    </button>
+                                </td>
+                            </tr>
+                        `).join('')}
+                    </tbody>
+                </table>
+            `;
+            container.innerHTML = html;
+        }
+
+        async function removeMember(groupId, userId) {
+            if (!confirm('Are you sure you want to remove this member from the group?')) return;
+
+            const response = await apiCall(`/api/chief/groups/${groupId}/members/${userId}`, {
+                method: 'DELETE'
+            });
+
+            if (response) {
+                showNotification('Member removed successfully', 'success');
+                loadMembers();
+            } else {
+                showNotification('Failed to remove member', 'danger');
+            }
+        }
+
+        async function loadAvailableMembers() {
+            const groupId = document.getElementById('memberGroupSelect').value;
+            if (!groupId) {
+                showNotification('Please select a group first', 'warning');
+                return;
+            }
+
+            const data = await apiCall(`/api/chief/available-members?groupId=${groupId}`);
+            if (data) {
+                const select = document.getElementById('newMemberSelect');
+                select.innerHTML = '<option value="">Select a member to add</option>';
+                data.users.forEach(user => {
+                    select.innerHTML += `<option value="${user.id}">${user.full_name} (${user.username}) - ${user.phone || 'No phone'}</option>`;
+                });
+            }
+        }
+
+        async function addMember() {
+            const groupId = document.getElementById('memberGroupSelect').value;
+            const userId = document.getElementById('newMemberSelect').value;
+
+            if (!groupId) {
+                showNotification('Please select a group first', 'warning');
+                return;
+            }
+
+            if (!userId) {
+                showNotification('Please select a member to add', 'warning');
+                return;
+            }
+
+            const response = await apiCall(`/api/chief/groups/${groupId}/members`, {
+                method: 'POST',
+                body: JSON.stringify({ userId: parseInt(userId) })
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('addMemberModal')).hide();
+                document.getElementById('newMemberSelect').value = '';
+                showNotification('Member added successfully', 'success');
+                loadMembers();
+            } else {
+                showNotification('Failed to add member', 'danger');
+            }
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'approved': return 'success';
+                case 'pending': return 'warning';
+                case 'rejected': return 'danger';
+                case 'completed': return 'info';
+                default: return 'secondary';
+            }
+        }
+
+        function openEditGroupModal(id, name, description, village) {
+            document.getElementById('editGroupId').value = id;
+            document.getElementById('editGroupName').value = name;
+            document.getElementById('editGroupDescription').value = description || '';
+            document.getElementById('editGroupVillage').value = village;
+            
+            const modal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+            modal.show();
+        }
+
+        async function updateGroup() {
+            const groupId = document.getElementById('editGroupId').value;
+            const form = document.getElementById('editGroupForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            console.log('Updating group:', groupId, data);
+
+            const response = await apiCall(`/api/chief/groups/${groupId}`, {
+                method: 'PUT',
+                body: JSON.stringify(data)
+            });
+
+            if (response && response.group) {
+                bootstrap.Modal.getInstance(document.getElementById('editGroupModal')).hide();
+                showNotification('Group updated successfully', 'success');
+                loadGroups();
+                loadDashboard();
+            } else {
+                const errorMsg = response && response.message ? response.message : 'Failed to update group';
+                showNotification(errorMsg, 'danger');
+            }
+        }
+
+        async function deleteGroup(groupId, groupName) {
+            if (!confirm(`Are you sure you want to delete the group "${groupName}"? This action cannot be undone.`)) {
+                return;
+            }
+
+            const response = await apiCall(`/api/chief/groups/${groupId}`, {
+                method: 'DELETE'
+            });
+
+            if (response && response.message) {
+                showNotification('Group deleted successfully', 'success');
+                loadGroups();
+                loadDashboard();
+            } else {
+                const errorMsg = response && response.message ? response.message : 'Failed to delete group';
+                showNotification(errorMsg, 'danger');
+            }
+        }
+
+        async function createGroup() {
+            const form = document.getElementById('createGroupForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            console.log('Creating group with data:', data);
+
+            const response = await apiCall('/api/chief/groups', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            console.log('Server response:', response);
+
+            if (response && response.group) {
+                bootstrap.Modal.getInstance(document.getElementById('createGroupModal')).hide();
+                form.reset();
+                showNotification('Group created successfully', 'success');
+                loadGroups();
+                loadDashboard();
+            } else {
+                const errorMsg = response && response.message ? response.message : 'Failed to create group';
+                showNotification(errorMsg, 'danger');
+            }
+        }
+
+        async function recordContribution() {
+            const groupId = document.getElementById('groupSelect').value;
+            if (!groupId) {
+                showNotification('Please select a group first', 'warning');
+                return;
+            }
+
+            const form = document.getElementById('recordContributionForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.group_id = groupId;
+
+            const response = await apiCall(`/api/chief/groups/${groupId}/contributions`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response && response.contribution) {
+                bootstrap.Modal.getInstance(document.getElementById('recordContributionModal')).hide();
+                form.reset();
+                showNotification('Contribution recorded successfully', 'success');
+                loadContributions();
+            } else {
+                showNotification('Failed to record contribution', 'danger');
+            }
+        }
+
+        async function issueLoan() {
+            const groupId = document.getElementById('loanGroupSelect').value;
+            if (!groupId) {
+                showNotification('Please select a group first', 'warning');
+                return;
+            }
+
+            const form = document.getElementById('issueLoanForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.group_id = groupId;
+
+            const response = await apiCall(`/api/chief/groups/${groupId}/loans`, {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response && response.loan) {
+                bootstrap.Modal.getInstance(document.getElementById('issueLoanModal')).hide();
+                form.reset();
+                showNotification('Loan issued successfully', 'success');
+                loadLoans();
+            } else {
+                showNotification('Failed to issue loan', 'danger');
+            }
+        }
+
+        async function updateLoanStatus(loanId, status) {
+            const response = await apiCall(`/api/chief/loans/${loanId}/status`, {
+                method: 'PUT',
+                body: JSON.stringify({ status })
+            });
+
+            if (response && response.message) {
+                showNotification(`Loan ${status} successfully`, 'success');
+                loadLoans();
+            } else {
+                showNotification('Failed to update loan status', 'danger');
+            }
+        }
+
+        function showNotification(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkAuth();
+            loadDashboard();
+        });
+    </script>
+</body>
+</html>

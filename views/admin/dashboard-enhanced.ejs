@@ -1,0 +1,2292 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --sidebar-width: 250px;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 100vh;
+            width: var(--sidebar-width);
+            background: var(--primary-gradient);
+            transition: all 0.3s;
+            z-index: 1000;
+            overflow-y: auto;
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 1rem 1.5rem;
+            border-radius: 0;
+            transition: all 0.3s;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+        
+        .main-content {
+            margin-left: var(--sidebar-width);
+            padding: 2rem;
+            min-height: 100vh;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-icon {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            background: var(--primary-gradient);
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .table-actions .btn {
+            padding: 0.25rem 0.5rem;
+            font-size: 0.875rem;
+        }
+        
+        .section-content {
+            display: none;
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+            
+            .sidebar.show {
+                transform: translateX(0);
+            }
+            
+            .main-content {
+                margin-left: 0;
+            }
+        }
+        
+        .navbar-brand {
+            color: white !important;
+            font-weight: bold;
+            font-size: 1.5rem;
+        }
+        
+        .user-info {
+            color: white;
+            padding: 1rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .badge-status {
+            padding: 0.5rem 1rem;
+            border-radius: 1rem;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+        }
+        
+        .form-control:focus,
+        .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="p-3">
+            <div class="navbar-brand">
+                <i class="bi bi-shield-check me-2"></i>
+                Ikibina Guardian
+            </div>
+        </div>
+        
+        <ul class="nav flex-column">
+            <li class="nav-item">
+                <a class="nav-link active" href="#" onclick="showSection(event, 'dashboard')">
+                    <i class="bi bi-speedometer2 me-2"></i> Dashboard
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'groups')">
+                    <i class="bi bi-people me-2"></i> Groups
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'chiefs')">
+                    <i class="bi bi-person-badge me-2"></i> Chiefs
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'members')">
+                    <i class="bi bi-person me-2"></i> Members
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'contributions')">
+                    <i class="bi bi-cash-stack me-2"></i> Contributions
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'loans')">
+                    <i class="bi bi-bank me-2"></i> Loans
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'attendance')">
+                    <i class="bi bi-calendar-check me-2"></i> Attendance
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'notifications')">
+                    <i class="bi bi-bell me-2"></i> Notifications
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'fines')">
+                    <i class="bi bi-cash-coin me-2"></i> Fines
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'reports')">
+                    <i class="bi bi-file-earmark-text me-2"></i> Reports
+                </a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="#" onclick="showSection(event, 'audit')">
+                    <i class="bi bi-journal-text me-2"></i> Audit Logs
+                </a>
+            </li>
+        </ul>
+        
+        <div class="user-info">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-person-circle me-2"></i>
+                <div>
+                    <div class="fw-bold"><%= user.full_name %></div>
+                    <small>Administrator</small>
+                </div>
+            </div>
+            <button class="btn btn-sm btn-outline-light mt-2 w-100" onclick="logout()">
+                <i class="bi bi-box-arrow-right"></i> Logout
+            </button>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <div class="main-content">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h1 class="h3 mb-0">Admin Dashboard</h1>
+            <div>
+                <button class="btn btn-outline-secondary me-2" onclick="refreshData()">
+                    <i class="bi bi-arrow-clockwise"></i> Refresh
+                </button>
+                <div class="btn-group">
+                    <button class="btn btn-outline-secondary" onclick="exportData('pdf')">
+                        <i class="bi bi-file-pdf"></i> PDF
+                    </button>
+                    <button class="btn btn-outline-secondary" onclick="exportData('excel')">
+                        <i class="bi bi-file-excel"></i> Excel
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Dashboard Section -->
+        <div id="dashboard-section" class="section-content active">
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalGroups">0</h3>
+                                <p class="text-muted mb-0">Total Groups</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-people"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="activeGroups">0</h3>
+                                <p class="text-muted mb-0">Active Groups</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-check-circle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalChiefs">0</h3>
+                                <p class="text-muted mb-0">Total Chiefs</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-person-badge"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalMembers">0</h3>
+                                <p class="text-muted mb-0">Total Members</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-person"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="row g-4 mb-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalContributions">0</h3>
+                                <p class="text-muted mb-0">Total Contributions</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-cash-stack"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="pendingPayments">0</h3>
+                                <p class="text-muted mb-0">Pending Payments</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-clock"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="totalLoans">0</h3>
+                                <p class="text-muted mb-0">Total Loans</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-bank"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <div class="d-flex justify-content-between align-items-center">
+                            <div>
+                                <h3 class="mb-1" id="defaulters">0</h3>
+                                <p class="text-muted mb-0">Loan Defaulters</p>
+                            </div>
+                            <div class="stat-icon">
+                                <i class="bi bi-exclamation-triangle"></i>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Charts -->
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Group Performance</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="groupPerformanceChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Monthly Contributions</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="monthlyContributionsChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Groups Section -->
+        <div id="groups-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Group Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createGroupModal">
+                        <i class="bi bi-plus-circle"></i> Create Group
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Group Name</th>
+                                    <th>Code</th>
+                                    <th>Location</th>
+                                    <th>Chief</th>
+                                    <th>Contribution</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="groupsTable">
+                                <!-- Groups will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Chiefs Section -->
+        <div id="chiefs-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Chief Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createChiefModal">
+                        <i class="bi bi-plus-circle"></i> Register Chief
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Assigned Group</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="chiefsTable">
+                                <!-- Chiefs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Members Section -->
+        <div id="members-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Member Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createMemberModal">
+                        <i class="bi bi-plus-circle"></i> Register Member
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Group</th>
+                                    <th>Member Number</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="membersTable">
+                                <!-- Members will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Contributions Section -->
+        <div id="contributions-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Contribution Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#recordContributionModal">
+                        <i class="bi bi-plus-circle"></i> Record Contribution
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="totalContributions">0</h3>
+                                        <p class="text-muted mb-0">Total Contributions</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-cash-stack"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="thisMonthContributions">0</h3>
+                                        <p class="text-muted mb-0">This Month</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-calendar-month"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="pendingContributions">0</h3>
+                                        <p class="text-muted mb-0">Pending</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="defaulters">0</h3>
+                                        <p class="text-muted mb-0">Defaulters</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Group</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="contributionsTable">
+                                <!-- Contributions will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Loans Section -->
+        <div id="loans-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Loan Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#approveLoanModal">
+                        <i class="bi bi-plus-circle"></i> Approve Loan
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="totalLoans">0</h3>
+                                        <p class="text-muted mb-0">Total Loans</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-bank"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="pendingLoans">0</h3>
+                                        <p class="text-muted mb-0">Pending</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="approvedLoans">0</h3>
+                                        <p class="text-muted mb-0">Approved</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="defaultedLoans">0</h3>
+                                        <p class="text-muted mb-0">Defaulted</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-exclamation-triangle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Group</th>
+                                    <th>Amount</th>
+                                    <th>Interest</th>
+                                    <th>Purpose</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="loansTable">
+                                <!-- Loans will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Attendance Section -->
+        <div id="attendance-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Attendance Management</h5>
+                    <div>
+                        <select class="form-select d-inline-block w-auto me-2" id="attendanceGroupFilter">
+                            <option value="">All Groups</option>
+                        </select>
+                        <input type="date" class="form-control d-inline-block w-auto me-2" id="attendanceDate">
+                        <button class="btn btn-primary" onclick="markAttendanceMode()">
+                            <i class="bi bi-check2-square"></i> Mark Attendance
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Group</th>
+                                    <th>Member</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Fine Applied</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="attendanceTable">
+                                <!-- Attendance will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Notifications Section -->
+        <div id="notifications-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Notification Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#sendNotificationModal">
+                        <i class="bi bi-plus-circle"></i> Send Notification
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-6">
+                            <label for="notificationTarget" class="form-label">Target Audience</label>
+                            <select class="form-select" id="notificationTarget">
+                                <option value="all">All Users</option>
+                                <option value="chiefs">All Chiefs</option>
+                                <option value="members">All Members</option>
+                                <option value="group">Specific Group</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label for="notificationGroup" class="form-label">Select Group</label>
+                            <select class="form-select" id="notificationGroup" style="display:none;">
+                                <!-- Groups will be loaded here -->
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Type</th>
+                                    <th>Target</th>
+                                    <th>Message</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="notificationsTable">
+                                <!-- Notifications will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Fines Section -->
+        <div id="fines-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Fine Management</h5>
+                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#createFineModal">
+                        <i class="bi bi-plus-circle"></i> Create Fine
+                    </button>
+                </div>
+                <div class="card-body">
+                    <div class="row g-4 mb-4">
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="totalFines">0</h3>
+                                        <p class="text-muted mb-0">Total Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-cash-coin"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="paidFines">0</h3>
+                                        <p class="text-muted mb-0">Paid Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-check-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="pendingFines">0</h3>
+                                        <p class="text-muted mb-0">Pending Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-clock"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stat-card">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <div>
+                                        <h3 class="mb-1" id="unpaidFines">0</h3>
+                                        <p class="text-muted mb-0">Unpaid Fines</p>
+                                    </div>
+                                    <div class="stat-icon">
+                                        <i class="bi bi-x-circle"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Group</th>
+                                    <th>Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="finesTable">
+                                <!-- Fines will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Reports Section -->
+        <div id="reports-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Reports Management</h5>
+                    <div>
+                        <select class="form-select d-inline-block w-auto me-2" id="reportType">
+                            <option value="weekly">Weekly</option>
+                            <option value="monthly">Monthly</option>
+                            <option value="yearly">Yearly</option>
+                            <option value="financial">Financial</option>
+                            <option value="loan">Loan</option>
+                            <option value="attendance">Attendance</option>
+                            <option value="contribution">Contribution</option>
+                        </select>
+                        <button class="btn btn-primary" onclick="generateReport()">
+                            <i class="bi bi-file-earmark-text"></i> Generate Report
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="row g-3 mb-4">
+                        <div class="col-md-4">
+                            <label for="reportGroup" class="form-label">Group</label>
+                            <select class="form-select" id="reportGroup">
+                                <option value="all">All Groups</option>
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="reportStartDate" class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="reportStartDate">
+                        </div>
+                        <div class="col-md-4">
+                            <label for="reportEndDate" class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="reportEndDate">
+                        </div>
+                    </div>
+                    <div id="reportContent">
+                        <!-- Report content will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Audit Logs Section -->
+        <div id="audit-section" class="section-content">
+            <div class="card">
+                <div class="card-header d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Audit Logs</h5>
+                    <div>
+                        <select class="form-select d-inline-block w-auto me-2" id="auditFilter">
+                            <option value="all">All Activities</option>
+                            <option value="login">Login History</option>
+                            <option value="payment">Payment Logs</option>
+                            <option value="loan">Loan Logs</option>
+                            <option value="group">Group Creation</option>
+                            <option value="user">User Management</option>
+                        </select>
+                        <button class="btn btn-outline-secondary" onclick="exportAuditLogs()">
+                            <i class="bi bi-download"></i> Export
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date & Time</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Group</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditTable">
+                                <!-- Audit logs will be loaded here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Group Modal -->
+    <div class="modal fade" id="createGroupModal" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create New Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createGroupForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="groupName" class="form-label">Group Name</label>
+                                <input type="text" class="form-control" id="groupName" name="group_name" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="groupCode" class="form-label">Group Code</label>
+                                <input type="text" class="form-control" id="groupCode" name="group_code" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="district" class="form-label">District</label>
+                                <input type="text" class="form-control" id="district" name="district" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="sector" class="form-label">Sector</label>
+                                <input type="text" class="form-control" id="sector" name="sector" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="cell" class="form-label">Cell</label>
+                                <input type="text" class="form-control" id="cell" name="cell_name" required>
+                            </div>
+                            <div class="col-md-3">
+                                <label for="village" class="form-label">Village</label>
+                                <input type="text" class="form-control" id="village" name="village" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="contributionAmount" class="form-label">Contribution Amount</label>
+                                <input type="number" class="form-control" id="contributionAmount" name="contribution_amount" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="frequency" class="form-label">Frequency</label>
+                                <select class="form-select" id="frequency" name="frequency" required>
+                                    <option value="weekly">Weekly</option>
+                                    <option value="monthly">Monthly</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="drawDay" class="form-label">Draw Day</label>
+                                <input type="text" class="form-control" id="drawDay" name="draw_day" placeholder="e.g., Friday">
+                            </div>
+                            <div class="col-md-4">
+                                <label for="launchDate" class="form-label">Launch Date</label>
+                                <input type="date" class="form-control" id="launchDate" name="launch_date" required>
+                            </div>
+                            <div class="col-md-4">
+                                <label for="launchTime" class="form-label">Launch Time</label>
+                                <input type="time" class="form-control" id="launchTime" name="launch_time" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createGroup()">Create Group</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Group Modal -->
+    <div class="modal fade" id="editGroupModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Edit Group</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="editGroupForm">
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label for="editGroupName" class="form-label">Group Name</label>
+                                <input type="text" class="form-control" id="editGroupName" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGroupCode" class="form-label">Group Code</label>
+                                <input type="text" class="form-control" id="editGroupCode" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGroupDistrict" class="form-label">District</label>
+                                <input type="text" class="form-control" id="editGroupDistrict" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGroupSector" class="form-label">Sector</label>
+                                <input type="text" class="form-control" id="editGroupSector" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGroupCell" class="form-label">Cell</label>
+                                <input type="text" class="form-control" id="editGroupCell" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="editGroupVillage" class="form-label">Village</label>
+                                <input type="text" class="form-control" id="editGroupVillage" required>
+                            </div>
+                            <div class="col-md-12">
+                                <label for="editGroupContribution" class="form-label">Contribution Amount</label>
+                                <input type="number" class="form-control" id="editGroupContribution" required>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="saveEditedGroup()">Save Changes</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Chief Modal -->
+    <div class="modal fade" id="createChiefModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New Chief</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createChiefForm">
+                        <div class="mb-3">
+                            <label for="chiefFullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="chiefFullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chiefEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="chiefEmail" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chiefPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="chiefPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chiefGroup" class="form-label">Assign Group</label>
+                            <select class="form-select" id="chiefGroup" required>
+                                <option value="">Select Group</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="chiefPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="chiefPassword" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendCredentials" checked>
+                            <label class="form-check-label" for="sendCredentials">
+                                Send credentials via SMS/Email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createChief()">Register Chief</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Member Modal -->
+    <div class="modal fade" id="createMemberModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Register New Member</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createMemberForm">
+                        <div class="mb-3">
+                            <label for="memberFullName" class="form-label">Full Name</label>
+                            <input type="text" class="form-control" id="memberFullName" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberEmail" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="memberEmail">
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberPhone" class="form-label">Phone</label>
+                            <input type="tel" class="form-control" id="memberPhone" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberGroup" class="form-label">Assign Group</label>
+                            <select class="form-select" id="memberGroup" required>
+                                <option value="">Select Group</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberNumber" class="form-label">Member Number</label>
+                            <input type="text" class="form-control" id="memberNumber" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="memberPassword" class="form-label">Password</label>
+                            <input type="password" class="form-control" id="memberPassword" value="member123" required>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendMemberCredentials" checked>
+                            <label class="form-check-label" for="sendMemberCredentials">
+                                Send credentials via SMS/Email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createMember()">Register Member</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Send Notification Modal -->
+    <div class="modal fade" id="sendNotificationModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Send Notification</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="sendNotificationForm">
+                        <div class="mb-3">
+                            <label for="notifTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="notifTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notifMessage" class="form-label">Message</label>
+                            <textarea class="form-control" id="notifMessage" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notifType" class="form-label">Type</label>
+                            <select class="form-select" id="notifType" required>
+                                <option value="payment">Payment Reminder</option>
+                                <option value="meeting">Meeting Reminder</option>
+                                <option value="draw">Draw Announcement</option>
+                                <option value="loan">Loan Update</option>
+                                <option value="emergency">Emergency</option>
+                                <option value="general">General</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="notifPriority" class="form-label">Priority</label>
+                            <select class="form-select" id="notifPriority" required>
+                                <option value="low">Low</option>
+                                <option value="medium">Medium</option>
+                                <option value="high">High</option>
+                            </select>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendSMS" checked>
+                            <label class="form-check-label" for="sendSMS">
+                                Send via SMS
+                            </label>
+                        </div>
+                        <div class="form-check mb-3">
+                            <input class="form-check-input" type="checkbox" id="sendEmail" checked>
+                            <label class="form-check-label" for="sendEmail">
+                                Send via Email
+                            </label>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="sendNotification()">Send Notification</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Fine Modal -->
+    <div class="modal fade" id="createFineModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Create Fine</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="createFineForm">
+                        <div class="mb-3">
+                            <label for="fineMember" class="form-label">Member</label>
+                            <select class="form-select" id="fineMember" required>
+                                <option value="">Select Member</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineType" class="form-label">Fine Type</label>
+                            <select class="form-select" id="fineType" required>
+                                <option value="late_payment">Late Payment</option>
+                                <option value="absence">Meeting Absence</option>
+                                <option value="violation">Rule Violation</option>
+                                <option value="other">Other</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineAmount" class="form-label">Amount (RWF)</label>
+                            <input type="number" class="form-control" id="fineAmount" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineReason" class="form-label">Reason</label>
+                            <textarea class="form-control" id="fineReason" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="fineDate" class="form-label">Date</label>
+                            <input type="date" class="form-control" id="fineDate" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-primary" onclick="createFine()">Create Fine</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        let currentData = {
+            groups: [],
+            chiefs: [],
+            members: [],
+            attendance: [],
+            notifications: [],
+            fines: [],
+            reports: [],
+            auditLogs: []
+        };
+        let charts = {};
+
+        // Authentication check
+        let authChecked = false;
+        function checkAuth() {
+            if (authChecked) {
+                console.log('Auth already checked, preventing redirect loop');
+                return JSON.parse(sessionStorage.getItem('user') || '{}');
+            }
+            
+            const user = sessionStorage.getItem('user');
+            console.log('Checking auth, user:', user);
+            if (!user) {
+                console.log('No user found, redirecting to login');
+                window.location.href = '/login';
+                return false;
+            }
+            try {
+                const parsedUser = JSON.parse(user);
+                console.log('User authenticated:', parsedUser);
+                authChecked = true;
+                return parsedUser;
+            } catch (error) {
+                console.error('Error parsing user data:', error);
+                sessionStorage.removeItem('user');
+                window.location.href = '/login';
+                return false;
+            }
+        }
+
+        async function apiCall(url, options = {}) {
+            const defaultOptions = {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            };
+            
+            const finalOptions = {
+                ...defaultOptions,
+                ...options,
+                headers: {
+                    ...defaultOptions.headers,
+                    ...options.headers
+                }
+            };
+            
+            try {
+                const response = await fetch(url, finalOptions);
+                
+                // Don't clear sessionStorage on 401, let the auth check handle it
+                if (!response.ok) {
+                    console.error('API call failed:', response.status, response.statusText);
+                    return null;
+                }
+                
+                return await response.json();
+            } catch (error) {
+                console.error('API call error:', error);
+                return null;
+            }
+        }
+
+        function logout() {
+            sessionStorage.removeItem('user');
+            window.location.href = '/login';
+        }
+
+        // Section Management
+        function showSection(evt, section) {
+            if (evt && typeof evt.preventDefault === 'function') {
+                evt.preventDefault();
+            }
+            const sections = ['dashboard', 'groups', 'chiefs', 'members', 'contributions', 'loans', 'attendance', 'notifications', 'fines', 'reports', 'audit'];
+            sections.forEach(s => {
+                const element = document.getElementById(`${s}-section`);
+                if (element) {
+                    element.classList.toggle('active', s === section);
+                    element.style.display = s === section ? 'block' : 'none';
+                }
+            });
+
+            const navLinks = document.querySelectorAll('.sidebar .nav-link');
+            navLinks.forEach(link => link.classList.remove('active'));
+            
+            // Find the clicked link and add active class
+            const clickedLink = evt?.target?.closest?.('.nav-link');
+            if (clickedLink) {
+                clickedLink.classList.add('active');
+            }
+
+            loadData(section);
+        }
+
+        async function loadData(section) {
+            switch(section) {
+                case 'dashboard':
+                    loadDashboard();
+                    break;
+                case 'groups':
+                    loadGroups();
+                    break;
+                case 'chiefs':
+                    loadChiefs();
+                    break;
+                case 'members':
+                    loadMembers();
+                    break;
+                case 'contributions':
+                    loadContributions();
+                    break;
+                case 'loans':
+                    loadLoans();
+                    break;
+                case 'attendance':
+                    loadAttendance();
+                    break;
+                case 'notifications':
+                    loadNotifications();
+                    break;
+                case 'fines':
+                    loadFines();
+                    break;
+                case 'reports':
+                    loadReports();
+                    break;
+                case 'audit':
+                    loadAuditLogs();
+                    break;
+            }
+        }
+
+        // Dashboard Functions
+        async function loadDashboard() {
+            // Simulate dashboard stats
+            const stats = {
+                totalGroups: (currentData.groups || []).length,
+                activeGroups: (currentData.groups || []).filter(g => g.status === 'active').length,
+                totalChiefs: (currentData.chiefs || []).length,
+                totalMembers: (currentData.members || []).length,
+                totalContributions: 15000,
+                totalLoans: 5000
+            };
+            
+            if (stats) {
+                document.getElementById('totalGroups').textContent = stats.totalGroups;
+                document.getElementById('activeGroups').textContent = stats.activeGroups;
+                document.getElementById('totalChiefs').textContent = stats.totalChiefs;
+                document.getElementById('totalMembers').textContent = stats.totalMembers;
+                document.getElementById('totalContributions').textContent = `RWF ${stats.totalContributions.toLocaleString()}`;
+                document.getElementById('totalLoans').textContent = stats.totalLoans;
+                
+                // Initialize charts
+                initializeCharts();
+            }
+        }
+
+        function initializeCharts() {
+            // Destroy existing charts if they exist
+            if (charts.groupPerformance) {
+                charts.groupPerformance.destroy();
+            }
+            if (charts.monthlyContributions) {
+                charts.monthlyContributions.destroy();
+            }
+
+            // Group Performance Chart
+            const ctx1 = document.getElementById('groupPerformanceChart').getContext('2d');
+            charts.groupPerformance = new Chart(ctx1, {
+                type: 'bar',
+                data: {
+                    labels: ['Active', 'Inactive', 'New'],
+                    datasets: [{
+                        label: 'Groups',
+                        data: [12, 3, 5],
+                        backgroundColor: ['#28a745', '#dc3545', '#17a2b8']
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+
+            // Monthly Contributions Chart
+            const ctx2 = document.getElementById('monthlyContributionsChart').getContext('2d');
+            charts.monthlyContributions = new Chart(ctx2, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'Contributions',
+                        data: [120000, 150000, 180000, 160000, 200000, 220000],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false
+                }
+            });
+        }
+
+        // Groups Functions
+        function loadGroups() {
+            const groups = currentData.groups || [];
+            if (groups.length > 0) {
+                displayGroups(groups);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('groupsTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No groups created yet</td></tr>';
+            }
+        }
+
+        function displayGroups(groups) {
+            const tbody = document.getElementById('groupsTable');
+            tbody.innerHTML = groups.map(group => `
+                <tr>
+                    <td>${group.group_name}</td>
+                    <td>${group.group_code}</td>
+                    <td>${group.village}, ${group.cell_name}</td>
+                    <td>${group.chief_name || 'Not assigned'}</td>
+                    <td>RWF ${group.contribution_amount?.toLocaleString() || 0}</td>
+                    <td><span class="badge ${group.status === 'active' ? 'bg-success' : 'bg-danger'}">${group.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editGroup(${group.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteGroup(${group.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createGroup() {
+            const form = document.getElementById('createGroupForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            if (!data.group_name || !data.group_code || !data.district) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Simulate successful group creation
+            const newGroup = {
+                id: Date.now(),
+                group_name: data.group_name,
+                group_code: data.group_code,
+                district: data.district,
+                sector: data.sector,
+                cell: data.cell,
+                village: data.village,
+                contribution_amount: data.contribution_amount,
+                status: 'active',
+                created_at: new Date().toISOString()
+            };
+            
+            bootstrap.Modal.getInstance(document.getElementById('createGroupModal')).hide();
+            form.reset();
+            showNotification('Group created successfully', 'success');
+            
+            // Add to current groups list
+            const currentGroups = currentData.groups || [];
+            currentGroups.push(newGroup);
+            currentData.groups = currentGroups;
+            
+            displayGroups(currentGroups);
+            updateGroupDropdown();
+        }
+
+        // Edit Group Function
+        async function editGroup(groupId) {
+            const groups = currentData.groups || [];
+            const group = groups.find(g => g.id === groupId);
+            
+            if (!group) {
+                showNotification('Group not found', 'error');
+                return;
+            }
+            
+            // Populate edit form with group data
+            document.getElementById('editGroupName').value = group.group_name || '';
+            document.getElementById('editGroupCode').value = group.group_code || '';
+            document.getElementById('editGroupDistrict').value = group.district || '';
+            document.getElementById('editGroupSector').value = group.sector || '';
+            document.getElementById('editGroupCell').value = group.cell || '';
+            document.getElementById('editGroupVillage').value = group.village || '';
+            document.getElementById('editGroupContribution').value = group.contribution_amount || '';
+            
+            // Store the group ID for the save function
+            document.getElementById('editGroupForm').dataset.groupId = groupId;
+            
+            // Show the edit modal
+            const editModal = new bootstrap.Modal(document.getElementById('editGroupModal'));
+            editModal.show();
+        }
+
+        // Save Edited Group
+        async function saveEditedGroup() {
+            const form = document.getElementById('editGroupForm');
+            const groupId = parseInt(form.dataset.groupId);
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            if (!data.group_name || !data.group_code || !data.district) {
+                alert('Please fill in all required fields');
+                return;
+            }
+            
+            // Find and update the group
+            const groups = currentData.groups || [];
+            const groupIndex = groups.findIndex(g => g.id === groupId);
+            
+            if (groupIndex === -1) {
+                showNotification('Group not found', 'error');
+                return;
+            }
+            
+            // Update group data
+            groups[groupIndex] = {
+                ...groups[groupIndex],
+                group_name: data.group_name,
+                group_code: data.group_code,
+                district: data.district,
+                sector: data.sector,
+                cell: data.cell,
+                village: data.village,
+                contribution_amount: data.contribution_amount
+            };
+            
+            currentData.groups = groups;
+            
+            // Hide modal and refresh
+            bootstrap.Modal.getInstance(document.getElementById('editGroupModal')).hide();
+            showNotification('Group updated successfully', 'success');
+            displayGroups(groups);
+            updateGroupDropdown();
+        }
+
+        // Delete Group Function
+        async function deleteGroup(groupId) {
+            if (!confirm('Are you sure you want to delete this group? This action cannot be undone.')) {
+                return;
+            }
+            
+            const groups = currentData.groups || [];
+            const filteredGroups = groups.filter(g => g.id !== groupId);
+            
+            currentData.groups = filteredGroups;
+            
+            showNotification('Group deleted successfully', 'success');
+            displayGroups(filteredGroups);
+            updateGroupDropdown();
+        }
+
+        // Chiefs Functions
+        function loadChiefs() {
+            const chiefs = currentData.chiefs || [];
+            if (chiefs.length > 0) {
+                displayChiefs(chiefs);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('chiefsTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No chiefs created yet</td></tr>';
+            }
+        }
+
+        function displayChiefs(chiefs) {
+            const tbody = document.getElementById('chiefsTable');
+            tbody.innerHTML = chiefs.map(chief => `
+                <tr>
+                    <td>${chief.full_name}</td>
+                    <td>${chief.email}</td>
+                    <td>${chief.phone}</td>
+                    <td>${chief.group_name || 'Not assigned'}</td>
+                    <td><span class="badge ${chief.status === 'active' ? 'bg-success' : 'bg-danger'}">${chief.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editChief(${chief.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteChief(${chief.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="replaceChief(${chief.id})">
+                            <i class="bi bi-arrow-repeat"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        
+        function populateGroupDropdowns(groups) {
+            const chiefGroupSelect = document.getElementById('chiefGroup');
+            const memberGroupSelect = document.getElementById('memberGroup');
+            const notificationGroupSelect = document.getElementById('notificationGroup');
+            
+            const groupOptions = groups.map(g => `<option value="${g.id}">${g.group_name}</option>`).join('');
+            
+            if (chiefGroupSelect) chiefGroupSelect.innerHTML = '<option value="">Select Group</option>' + groupOptions;
+            if (memberGroupSelect) memberGroupSelect.innerHTML = '<option value="">Select Group</option>' + groupOptions;
+            if (notificationGroupSelect) notificationGroupSelect.innerHTML = '<option value="">Select Group</option>' + groupOptions;
+        }
+
+        // Members Functions
+        function loadMembers() {
+            const members = currentData.members || [];
+            if (members.length > 0) {
+                displayMembers(members);
+                // Populate fine member dropdown
+                const fineMemberSelect = document.getElementById('fineMember');
+                if (fineMemberSelect) {
+                    const memberOptions = members.map(m => `<option value="${m.id}">${m.full_name} - ${m.group_name}</option>`).join('');
+                    fineMemberSelect.innerHTML = '<option value="">Select Member</option>' + memberOptions;
+                }
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('membersTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No members created yet</td></tr>';
+            }
+        }
+
+        function displayMembers(members) {
+            const tbody = document.getElementById('membersTable');
+            tbody.innerHTML = members.map(member => `
+                <tr>
+                    <td>${member.full_name}</td>
+                    <td>${member.email}</td>
+                    <td>${member.phone}</td>
+                    <td>${member.group_name || 'Not assigned'}</td>
+                    <td>${member.member_number || 'N/A'}</td>
+                    <td><span class="badge ${member.status === 'active' ? 'bg-success' : 'bg-danger'}">${member.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editMember(${member.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteMember(${member.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                        <button class="btn btn-sm btn-info" onclick="suspendMember(${member.id})">
+                            <i class="bi bi-pause"></i>
+                        </button>
+                        <button class="btn btn-sm btn-secondary" onclick="resetPassword(${member.id})">
+                            <i class="bi bi-key"></i>
+                        </button>
+                        <button class="btn btn-sm btn-primary" onclick="transferMember(${member.id})">
+                            <i class="bi bi-arrow-left-right"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createMember() {
+            const form = document.getElementById('createMemberForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            data.role = 'member';
+
+            const response = await apiCall('/api/admin/members', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('createMemberModal')).hide();
+                form.reset();
+                showNotification('Member registered successfully', 'success');
+                loadMembers();
+            }
+        }
+
+        // Attendance Functions
+        function loadAttendance() {
+            const attendance = currentData.attendance || [];
+            if (attendance.length > 0) {
+                displayAttendance(attendance);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('attendanceTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No attendance records yet</td></tr>';
+            }
+        }
+
+        function displayAttendance(attendance) {
+            const tbody = document.getElementById('attendanceTable');
+            tbody.innerHTML = attendance.map(record => `
+                <tr>
+                    <td>${record.group_name}</td>
+                    <td>${record.member_name}</td>
+                    <td>${new Date(record.meeting_date).toLocaleDateString()}</td>
+                    <td><span class="badge bg-${record.status === 'present' ? 'success' : record.status === 'late' ? 'warning' : 'danger'}">${record.status}</span></td>
+                    <td>RWF ${record.fine_amount || 0}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editAttendance(${record.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function markAttendanceMode() {
+            showNotification('Attendance marking mode activated', 'info');
+            // Implementation would open attendance marking interface
+        }
+
+        // Contributions Functions
+        function loadContributions() {
+            const contributions = currentData.contributions || [];
+            if (contributions.length > 0) {
+                displayContributions(contributions);
+                updateContributionStats(contributions);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('contributionsTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No contributions recorded yet</td></tr>';
+            }
+        }
+
+        function displayContributions(contributions) {
+            const tbody = document.getElementById('contributionsTable');
+            tbody.innerHTML = contributions.map(contribution => `
+                <tr>
+                    <td>${contribution.member_name}</td>
+                    <td>${contribution.group_name}</td>
+                    <td>RWF ${parseFloat(contribution.amount).toLocaleString()}</td>
+                    <td>${new Date(contribution.date).toLocaleDateString()}</td>
+                    <td><span class="badge bg-${contribution.status === 'paid' ? 'success' : 'warning'}">${contribution.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewContribution(${contribution.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-warning" onclick="editContribution(${contribution.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateContributionStats(contributions) {
+            const total = contributions.reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
+            const thisMonth = contributions.filter(c => {
+                const contribDate = new Date(c.date);
+                const now = new Date();
+                return contribDate.getMonth() === now.getMonth() && contribDate.getFullYear() === now.getFullYear();
+            }).reduce((sum, c) => sum + parseFloat(c.amount || 0), 0);
+            const pending = contributions.filter(c => c.status === 'pending').length;
+            const defaulters = contributions.filter(c => c.status === 'overdue').length;
+
+            document.getElementById('totalContributions').textContent = `RWF ${total.toLocaleString()}`;
+            document.getElementById('thisMonthContributions').textContent = `RWF ${thisMonth.toLocaleString()}`;
+            document.getElementById('pendingContributions').textContent = pending;
+            document.getElementById('defaulters').textContent = defaulters;
+        }
+
+        // Loans Functions
+        function loadLoans() {
+            const loans = currentData.loans || [];
+            if (loans.length > 0) {
+                displayLoans(loans);
+                updateLoanStats(loans);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('loansTable');
+                tbody.innerHTML = '<tr><td colspan="7" class="text-center text-muted">No loan applications yet</td></tr>';
+            }
+        }
+
+        function displayLoans(loans) {
+            const tbody = document.getElementById('loansTable');
+            tbody.innerHTML = loans.map(loan => `
+                <tr>
+                    <td>${loan.member_name}</td>
+                    <td>${loan.group_name}</td>
+                    <td>RWF ${parseFloat(loan.amount).toLocaleString()}</td>
+                    <td>${loan.interest_rate}%</td>
+                    <td>${loan.purpose}</td>
+                    <td><span class="badge bg-${getLoanStatusColor(loan.status)}">${loan.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewLoan(${loan.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-${loan.status === 'pending' ? 'success' : 'warning'}" onclick="${loan.status === 'pending' ? 'approveLoan' : 'editLoan'}(${loan.id})">
+                            <i class="bi bi-${loan.status === 'pending' ? 'check' : 'pencil'}"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteLoan(${loan.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function updateLoanStats(loans) {
+            const pending = loans.filter(l => l.status === 'pending').length;
+            const approved = loans.filter(l => l.status === 'approved').length;
+            const defaulted = loans.filter(l => l.status === 'defaulted').length;
+
+            document.getElementById('totalLoans').textContent = loans.length;
+            document.getElementById('pendingLoans').textContent = pending;
+            document.getElementById('approvedLoans').textContent = approved;
+            document.getElementById('defaultedLoans').textContent = defaulted;
+        }
+
+        function getLoanStatusColor(status) {
+            switch(status) {
+                case 'approved': return 'success';
+                case 'pending': return 'warning';
+                case 'rejected': return 'danger';
+                case 'defaulted': return 'danger';
+                case 'completed': return 'info';
+                default: return 'secondary';
+            }
+        }
+
+        // Notifications Functions
+        function loadNotifications() {
+            const notifications = currentData.notifications || [];
+            if (notifications.length > 0) {
+                displayNotifications(notifications);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('notificationsTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No notifications yet</td></tr>';
+            }
+        }
+        
+        function displayNotifications(notifications) {
+            const tbody = document.getElementById('notificationsTable');
+            tbody.innerHTML = notifications.map(notification => `
+                <tr>
+                    <td>${new Date(notification.created_at).toLocaleDateString()}</td>
+                    <td>${notification.type}</td>
+                    <td>${notification.target}</td>
+                    <td>${notification.message}</td>
+                    <td><span class="badge bg-${notification.status === 'sent' ? 'success' : 'warning'}">${notification.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewNotification(${notification.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteNotification(${notification.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        function displayNotifications(notifications) {
+            const tbody = document.getElementById('notificationsTable');
+            tbody.innerHTML = notifications.map(notif => `
+                <tr>
+                    <td>${new Date(notif.created_at).toLocaleDateString()}</td>
+                    <td><span class="badge bg-info">${notif.type}</span></td>
+                    <td>${notif.target}</td>
+                    <td>${notif.message}</td>
+                    <td><span class="badge bg-${notif.status === 'sent' ? 'success' : 'warning'}">${notif.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-info" onclick="viewNotification(${notif.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-danger" onclick="deleteNotification(${notif.id})">
+                            <i class="bi bi-trash"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function sendNotification() {
+            const form = document.getElementById('sendNotificationForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            const response = await apiCall('/api/admin/notifications', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('sendNotificationModal')).hide();
+                form.reset();
+                showNotification('Notification sent successfully', 'success');
+                loadNotifications();
+            }
+        }
+
+        // Fines Functions
+        function loadFines() {
+            const fines = currentData.fines || [];
+            if (fines.length > 0) {
+                displayFines(fines);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('finesTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No fines created yet</td></tr>';
+            }
+        }
+
+        function displayFines(fines) {
+            const tbody = document.getElementById('finesTable');
+            tbody.innerHTML = fines.map(fine => `
+                <tr>
+                    <td>${fine.member_name}</td>
+                    <td>${fine.group_name}</td>
+                    <td><span class="badge bg-warning">${fine.fine_type}</span></td>
+                    <td>RWF ${fine.amount.toLocaleString()}</td>
+                    <td>${new Date(fine.created_at).toLocaleDateString()}</td>
+                    <td><span class="badge bg-${fine.status === 'paid' ? 'success' : fine.status === 'pending' ? 'warning' : 'danger'}">${fine.status}</span></td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-warning" onclick="editFine(${fine.id})">
+                            <i class="bi bi-pencil"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="markFinePaid(${fine.id})">
+                            <i class="bi bi-check"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function createFine() {
+            const form = document.getElementById('createFineForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+
+            const response = await apiCall('/api/admin/fines', {
+                method: 'POST',
+                body: JSON.stringify(data)
+            });
+
+            if (response) {
+                bootstrap.Modal.getInstance(document.getElementById('createFineModal')).hide();
+                form.reset();
+                showNotification('Fine created successfully', 'success');
+                loadFines();
+            }
+        }
+
+        // Chiefs Functions
+        async function createChief() {
+            const form = document.getElementById('createChiefForm');
+            
+            // Get form values directly by ID to ensure correct field mapping
+            const fullName = document.getElementById('chiefFullName').value.trim();
+            const email = document.getElementById('chiefEmail').value.trim();
+            const phone = document.getElementById('chiefPhone').value.trim();
+            const chiefGroup = document.getElementById('chiefGroup').value;
+            
+            // Validate required fields
+            if (!fullName || !email || !phone) {
+                alert('Please fill in all required fields (Full Name, Email, and Phone)');
+                return;
+            }
+            
+            // Validate email format
+            const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+            if (!emailRegex.test(email)) {
+                alert('Please enter a valid email address');
+                return;
+            }
+            
+            // Validate phone format (basic validation)
+            if (phone.length < 10) {
+                alert('Please enter a valid phone number (at least 10 digits)');
+                return;
+            }
+            
+            const data = {
+                full_name: fullName,
+                email: email,
+                phone: phone,
+                chiefGroup: chiefGroup
+            };
+            
+            // Simulate successful chief creation
+            const newChief = {
+                id: Date.now(),
+                full_name: data.full_name,
+                email: data.email,
+                phone: data.phone,
+                role: 'chief',
+                status: 'active',
+                created_at: new Date().toISOString(),
+                assigned_group: data.chiefGroup
+            };
+            
+            bootstrap.Modal.getInstance(document.getElementById('createChiefModal')).hide();
+            form.reset();
+            showNotification('Chief created successfully', 'success');
+            
+            // Add to current chiefs list
+            const currentChiefs = currentData.chiefs || [];
+            currentChiefs.push(newChief);
+            currentData.chiefs = currentChiefs;
+            
+            displayChiefs(currentChiefs);
+        }
+
+        // Update group dropdowns with current groups
+        function updateGroupDropdown() {
+            const groupSelects = document.querySelectorAll('[id$="Group"]');
+            const currentGroups = currentData.groups || [];
+            
+            groupSelects.forEach(select => {
+                const options = '<option value="">Select Group</option>' + 
+                    currentGroups.map(g => `<option value="${g.id}">${g.group_name}</option>`).join('');
+                select.innerHTML = options;
+            });
+        }
+
+        // Reports Functions
+        function loadReports() {
+            const reports = currentData.reports || [];
+            if (reports.length > 0) {
+                displayReports(reports);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('reportsTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No reports generated yet</td></tr>';
+            }
+        }
+        
+        function displayReports(reports) {
+            const tbody = document.getElementById('reportsTable');
+            tbody.innerHTML = reports.map(report => `
+                <tr>
+                    <td>${new Date(report.created_at).toLocaleDateString()}</td>
+                    <td>${report.type}</td>
+                    <td>${report.group_name || 'All Groups'}</td>
+                    <td>${report.status}</td>
+                    <td class="table-actions">
+                        <button class="btn btn-sm btn-primary" onclick="viewReport(${report.id})">
+                            <i class="bi bi-eye"></i>
+                        </button>
+                        <button class="btn btn-sm btn-success" onclick="downloadReport(${report.id})">
+                            <i class="bi bi-download"></i>
+                        </button>
+                    </td>
+                </tr>
+            `).join('');
+        }
+
+        async function generateReport() {
+            const reportType = document.getElementById('reportType').value;
+            const groupId = document.getElementById('reportGroup').value;
+            const startDate = document.getElementById('reportStartDate').value;
+            const endDate = document.getElementById('reportEndDate').value;
+
+            const response = await apiCall('/api/admin/reports', {
+                method: 'POST',
+                body: JSON.stringify({ reportType, groupId, startDate, endDate })
+            });
+
+            if (response) {
+                displayReport(response.report);
+                showNotification('Report generated successfully', 'success');
+            }
+        }
+
+        function displayReport(report) {
+            const reportContent = document.getElementById('reportContent');
+            reportContent.innerHTML = `
+                <div class="card">
+                    <div class="card-header">
+                        <h6 class="mb-0">${report.title}</h6>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm">
+                                <thead>
+                                    <tr>
+                                        ${report.headers.map(h => `<th>${h}</th>`).join('')}
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${report.data.map(row => `
+                                        <tr>
+                                            ${row.map(cell => `<td>${cell}</td>`).join('')}
+                                        </tr>
+                                    `).join('')}
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="mt-3">
+                            <button class="btn btn-primary" onclick="downloadReport('${report.type}')">
+                                <i class="bi bi-download"></i> Download PDF
+                            </button>
+                            <button class="btn btn-success" onclick="downloadReportExcel('${report.type}')">
+                                <i class="bi bi-file-excel"></i> Download Excel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        // Audit Logs Functions
+        function loadAuditLogs() {
+            const auditLogs = currentData.auditLogs || [];
+            if (auditLogs.length > 0) {
+                displayAuditLogs(auditLogs);
+            } else {
+                // Show empty state
+                const tbody = document.getElementById('auditTable');
+                tbody.innerHTML = '<tr><td colspan="6" class="text-center text-muted">No audit logs yet</td></tr>';
+            }
+        }
+        
+        function displayAuditLogs(auditLogs) {
+            const tbody = document.getElementById('auditTable');
+            tbody.innerHTML = auditLogs.map(log => `
+                <tr>
+                    <td>${new Date(log.timestamp).toLocaleDateString()}</td>
+                    <td>${new Date(log.created_at).toLocaleString()}</td>
+                    <td>${log.user_name}</td>
+                    <td><span class="badge bg-info">${log.action}</span></td>
+                    <td>${log.group_name || 'N/A'}</td>
+                    <td>${log.details}</td>
+                    <td>${log.ip_address}</td>
+                </tr>
+            `).join('');
+        }
+
+        function exportAuditLogs() {
+            const filter = document.getElementById('auditFilter')?.value || 'all';
+            showNotification('Exporting audit logs...', 'info');
+            // Implementation would trigger file download
+        }
+
+        // Group Management Functions
+        async function activateGroup(groupId) {
+            const response = await apiCall(`/api/admin/groups/${groupId}/activate`, {
+                method: 'POST'
+            });
+            if (response) {
+                showNotification('Group activated successfully', 'success');
+                loadGroups();
+            }
+        }
+
+        async function deactivateGroup(groupId) {
+            const response = await apiCall(`/api/admin/groups/${groupId}/deactivate`, {
+                method: 'POST'
+            });
+            if (response) {
+                showNotification('Group deactivated successfully', 'success');
+                loadGroups();
+            }
+        }
+
+        // Utility Functions
+        function refreshData() {
+            const activeSection = document.querySelector('.section-content.active').id.replace('-section', '');
+            loadData(activeSection);
+            showNotification('Data refreshed', 'info');
+        }
+
+        function exportData(format) {
+            showNotification(`Exporting as ${format.toUpperCase()}...`, 'info');
+            // Implementation would go here
+        }
+
+        function showNotification(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show position-fixed`;
+            alertDiv.style.cssText = 'top: 20px; right: 20px; z-index: 9999; min-width: 300px;';
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            document.body.appendChild(alertDiv);
+            
+            setTimeout(() => {
+                alertDiv.remove();
+            }, 5000);
+        }
+
+        function updateGroupDropdown() {
+            const groups = currentData.groups || [];
+            const dropdowns = document.querySelectorAll('#chiefGroup, #memberGroup, #notificationGroup');
+            dropdowns.forEach(dropdown => {
+                if (dropdown) {
+                    dropdown.innerHTML = '<option value="">Select Group</option>' + 
+                        groups
+                            .map(group => {
+                                const label = group.group_name || group.name || 'Unnamed Group';
+                                return `<option value="${group.id}">${label}</option>`;
+                            })
+                            .join('');
+                }
+            });
+        }
+
+        // Event Listeners
+        document.getElementById('createChiefModal')?.addEventListener('shown.bs.modal', function () {
+            // Refresh group dropdown every time the modal opens
+            updateGroupDropdown();
+        });
+        document.getElementById('notificationTarget')?.addEventListener('change', function() {
+            const notificationGroup = document.getElementById('notificationGroup');
+            if (this.value === 'group') {
+                notificationGroup.style.display = 'block';
+            } else {
+                notificationGroup.style.display = 'none';
+            }
+        });
+
+        document.getElementById('auditFilter')?.addEventListener('change', loadAuditLogs);
+
+        // Initialize on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            // Wait a moment for sessionStorage to be ready
+            setTimeout(() => {
+                const auth = checkAuth();
+                if (auth) {
+                    console.log('Page loaded with authenticated user:', auth);
+                    loadDashboard();
+                    // Load initial data and update dropdowns
+                    updateGroupDropdown();
+                    
+                    // Show dashboard section by default
+                    showSection(null, 'dashboard');
+                }
+            }, 100);
+        });
+    </script>
+</body>
+</html>

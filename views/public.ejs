@@ -1,0 +1,545 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= title %></title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+        }
+        
+        .hero-section {
+            background: var(--primary-gradient);
+            color: white;
+            padding: 4rem 0;
+            text-align: center;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+            border-left: 4px solid #667eea;
+            text-align: center;
+        }
+        
+        .stat-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .district-card {
+            background: white;
+            border-radius: 1rem;
+            padding: 1.5rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+        }
+        
+        .district-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .success-story {
+            background: white;
+            border-radius: 1rem;
+            padding: 2rem;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: all 0.3s;
+        }
+        
+        .success-story:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .testimonial {
+            font-style: italic;
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .testimonial::before {
+            content: '"';
+            position: absolute;
+            left: 0;
+            top: 0;
+            font-size: 3rem;
+            color: #667eea;
+            opacity: 0.3;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 1rem 0;
+        }
+        
+        .footer {
+            background: #2c3e50;
+            color: white;
+            padding: 3rem 0;
+            margin-top: 4rem;
+        }
+        
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+        }
+        
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%);
+        }
+        
+        .section-title {
+            position: relative;
+            padding-bottom: 1rem;
+            margin-bottom: 2rem;
+        }
+        
+        .section-title::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 60px;
+            height: 3px;
+            background: var(--primary-gradient);
+        }
+        
+        .growth-indicator {
+            display: inline-flex;
+            align-items: center;
+            padding: 0.25rem 0.5rem;
+            border-radius: 1rem;
+            font-size: 0.875rem;
+            font-weight: 600;
+        }
+        
+        .growth-up {
+            background-color: #d4edda;
+            color: #155724;
+        }
+        
+        .growth-down {
+            background-color: #f8d7da;
+            color: #721c24;
+        }
+    </style>
+</head>
+<body>
+    <!-- Hero Section -->
+    <section class="hero-section">
+        <div class="container">
+            <div class="row">
+                <div class="col-lg-8 mx-auto">
+                    <h1 class="display-4 fw-bold mb-4">Ikibina Guardian</h1>
+                    <p class="lead mb-4">Community Savings Management System - Building Financial Futures Together</p>
+                    <p class="mb-4">Transparent, accountable, and secure community savings groups across Rwanda</p>
+                    <div class="d-flex justify-content-center gap-3">
+                        <a href="/login" class="btn btn-light btn-lg">
+                            <i class="bi bi-box-arrow-in-right me-2"></i> Login to System
+                        </a>
+                        <a href="/register" class="btn btn-outline-light btn-lg">
+                            <i class="bi bi-person-plus me-2"></i> Join Now
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Statistics Overview -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title">System Overview</h2>
+            <div class="row g-4">
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-people" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <div class="stat-number" id="totalGroups">0</div>
+                        <p class="text-muted mb-0">Active Groups</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-person-badge" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <div class="stat-number" id="totalMembers">0</div>
+                        <p class="text-muted mb-0">Total Members</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-cash-stack" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <div class="stat-number" id="totalMoney">0</div>
+                        <p class="text-muted mb-0">Money Circulated (RWF)</p>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="stat-card">
+                        <i class="bi bi-graph-up" style="font-size: 3rem; color: #667eea; margin-bottom: 1rem;"></i>
+                        <div class="stat-number" id="growthRate">0%</div>
+                        <p class="text-muted mb-0">Monthly Growth</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- District Performance -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title">District Performance</h2>
+            <div class="row g-4" id="districtGrid">
+                <!-- Districts will be loaded here -->
+            </div>
+        </div>
+    </section>
+
+    <!-- Growth Charts -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title">Growth Analytics</h2>
+            <div class="row g-4">
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Monthly Growth Trend</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="growthChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Group Distribution</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="distributionChart"></canvas>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Success Stories -->
+    <section class="py-5 bg-light">
+        <div class="container">
+            <h2 class="section-title">Success Stories</h2>
+            <div class="row g-4">
+                <div class="col-md-4">
+                    <div class="success-story">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-award" style="font-size: 3rem; color: #ffc107;"></i>
+                        </div>
+                        <h5>Abishyizehamwe Group</h5>
+                        <p class="text-muted">Kigali - Gasabo</p>
+                        <p class="testimonial">"Thanks to Ikibina Guardian, our group has saved over RWF 2M in just 6 months. The transparency and accountability have helped us grow stronger as a community."</p>
+                        <small class="text-muted">- Group Chief, Jean Claude</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="success-story">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-heart" style="font-size: 3rem; color: #dc3545;"></i>
+                        </div>
+                        <h5>Ubumwe Group</h5>
+                        <p class="text-muted">Southern Province - Huye</p>
+                        <p class="testimonial">"The smart draw system has revolutionized how we select winners. It's fair, transparent, and everyone trusts the process completely."</p>
+                        <small class="text-muted">- Member, Alice Mukamana</small>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="success-story">
+                        <div class="text-center mb-3">
+                            <i class="bi bi-trophy" style="font-size: 3rem; color: #28a745;"></i>
+                        </div>
+                        <h5>Imbereheyo Group</h5>
+                        <p class="text-muted">Eastern Province - Rwamagana</p>
+                        <p class="testimonial">"We've helped 15 members get loans for their small businesses. The loan management system is efficient and helps track repayments easily."</p>
+                        <small class="text-muted">- Group Chief, Patrick Niyonzima</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Top Performing Sectors -->
+    <section class="py-5">
+        <div class="container">
+            <h2 class="section-title">Top Performing Sectors</h2>
+            <div class="row">
+                <div class="col-md-8">
+                    <div class="card">
+                        <div class="card-body">
+                            <div id="topSectors">
+                                <!-- Top sectors will be loaded here -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="mb-0">Key Metrics</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Average Group Size</span>
+                                    <strong>15 members</strong>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Monthly Savings Rate</span>
+                                    <strong>95%</strong>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Loan Repayment Rate</span>
+                                    <strong>92%</strong>
+                                </div>
+                            </div>
+                            <div class="mb-3">
+                                <div class="d-flex justify-content-between align-items-center">
+                                    <span>Member Satisfaction</span>
+                                    <strong>4.8/5.0</strong>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="footer">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-4">
+                    <h5><i class="bi bi-shield-check me-2"></i>Ikibina Guardian</h5>
+                    <p>Building transparent and accountable community savings groups across Rwanda.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>Quick Links</h5>
+                    <ul class="list-unstyled">
+                        <li><a href="/login" class="text-white text-decoration-none">Login</a></li>
+                        <li><a href="/register" class="text-white text-decoration-none">Register</a></li>
+                        <li><a href="/public" class="text-white text-decoration-none">Public Dashboard</a></li>
+                    </ul>
+                </div>
+                <div class="col-md-4">
+                    <h5>Contact</h5>
+                    <p>
+                        <i class="bi bi-envelope me-2"></i> info@ikibina.rw<br>
+                        <i class="bi bi-phone me-2"></i> +250 788 000 000<br>
+                        <i class="bi bi-geo-alt me-2"></i> Kigali, Rwanda
+                    </p>
+                </div>
+            </div>
+            <hr class="bg-white">
+            <div class="text-center">
+                <p class="mb-0">&copy; 2024 Ikibina Guardian. All rights reserved.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script>
+        // Load public statistics
+        async function loadPublicStats() {
+            try {
+                const response = await fetch('/api/public/stats');
+                const stats = await response.json();
+                
+                if (stats) {
+                    document.getElementById('totalGroups').textContent = stats.totalGroups || 0;
+                    document.getElementById('totalMembers').textContent = stats.totalMembers || 0;
+                    document.getElementById('totalMoney').textContent = (stats.totalMoney || 0).toLocaleString();
+                    document.getElementById('growthRate').textContent = (stats.growthRate || 0) + '%';
+                    
+                    // Load districts
+                    if (stats.districts) {
+                        displayDistricts(stats.districts);
+                    }
+                    
+                    // Initialize charts
+                    initializeCharts();
+                }
+            } catch (error) {
+                console.error('Error loading stats:', error);
+                // Load demo data if API fails
+                loadDemoData();
+            }
+        }
+
+        function displayDistricts(districts) {
+            const grid = document.getElementById('districtGrid');
+            grid.innerHTML = districts.map(district => `
+                <div class="col-md-4">
+                    <div class="district-card">
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <h5 class="mb-0">${district.district || 'Unknown'}</h5>
+                            <span class="growth-indicator ${district.growth > 0 ? 'growth-up' : 'growth-down'}">
+                                <i class="bi bi-${district.growth > 0 ? 'arrow-up' : 'arrow-down'}"></i>
+                                ${Math.abs(district.growth || 0)}%
+                            </span>
+                        </div>
+                        <div class="row text-center">
+                            <div class="col-6">
+                                <h4 class="text-primary">${district.count || 0}</h4>
+                                <small class="text-muted">Groups</small>
+                            </div>
+                            <div class="col-6">
+                                <h4 class="text-success">${district.members || 0}</h4>
+                                <small class="text-muted">Members</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function initializeCharts() {
+            // Growth Chart
+            const growthCtx = document.getElementById('growthChart').getContext('2d');
+            new Chart(growthCtx, {
+                type: 'line',
+                data: {
+                    labels: ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun'],
+                    datasets: [{
+                        label: 'New Groups',
+                        data: [5, 8, 12, 15, 18, 22],
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4
+                    }, {
+                        label: 'New Members',
+                        data: [75, 120, 180, 225, 270, 330],
+                        borderColor: '#764ba2',
+                        backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                        tension: 0.4
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+
+            // Distribution Chart
+            const distributionCtx = document.getElementById('distributionChart').getContext('2d');
+            new Chart(distributionCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: ['Kigali', 'Northern', 'Southern', 'Eastern', 'Western'],
+                    datasets: [{
+                        data: [35, 20, 18, 15, 12],
+                        backgroundColor: [
+                            '#667eea',
+                            '#764ba2',
+                            '#f093fb',
+                            '#f5576c',
+                            '#4facfe'
+                        ]
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'bottom'
+                        }
+                    }
+                }
+            });
+        }
+
+        function loadDemoData() {
+            // Load demo statistics
+            document.getElementById('totalGroups').textContent = '25';
+            document.getElementById('totalMembers').textContent = '375';
+            document.getElementById('totalMoney').textContent = '2,500,000';
+            document.getElementById('growthRate').textContent = '15%';
+
+            // Load demo districts
+            const demoDistricts = [
+                { district: 'Kigali', count: 8, members: 120, growth: 15 },
+                { district: 'Northern', count: 5, members: 75, growth: 12 },
+                { district: 'Southern', count: 6, members: 90, growth: 18 },
+                { district: 'Eastern', count: 4, members: 60, growth: 8 },
+                { district: 'Western', count: 2, members: 30, growth: 5 }
+            ];
+            displayDistricts(demoDistricts);
+
+            // Load top sectors
+            const topSectors = [
+                { name: 'Gasabo', groups: 4, performance: 95 },
+                { name: 'Nyarugenge', groups: 3, performance: 92 },
+                { name: 'Kicukiro', groups: 2, performance: 90 },
+                { name: 'Musanze', groups: 3, performance: 88 },
+                { name: 'Huye', groups: 2, performance: 85 }
+            ];
+
+            const sectorsHtml = topSectors.map((sector, index) => `
+                <div class="d-flex justify-content-between align-items-center p-3 border-bottom">
+                    <div>
+                        <h6 class="mb-1">${index + 1}. ${sector.name}</h6>
+                        <small class="text-muted">${sector.groups} groups</small>
+                    </div>
+                    <div class="text-end">
+                        <div class="text-primary fw-bold">${sector.performance}%</div>
+                        <div class="progress" style="width: 100px; height: 6px;">
+                            <div class="progress-bar bg-primary" style="width: ${sector.performance}%"></div>
+                        </div>
+                    </div>
+                </div>
+            `).join('');
+            document.getElementById('topSectors').innerHTML = sectorsHtml;
+
+            // Initialize charts
+            initializeCharts();
+        }
+
+        // Load data on page load
+        document.addEventListener('DOMContentLoaded', function() {
+            loadPublicStats();
+        });
+    </script>
+</body>
+</html>
